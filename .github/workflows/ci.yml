@@ -1,0 +1,176 @@
+# CI（Requirement 15.1, 15.4, 15.5, 15.6, 15.11）
+#
+# ジョブ名は docs/github-setup.md の手順2の必須チェック名と一致させる。
+# 名前を変えるときは、ブランチ保護の必須チェックも同時に直すこと（一致しないと PR がマージできなくなる）。
+# 8つの必須チェックのうち `pr-title` だけは、タイトルの編集でも動くよう pr-title.yml にある。
+#
+# - 必須チェックが「待ち」のままにならないよう、paths: で絞らない
+# - 既定の権限は contents: read。codeql だけ security-events: write に上げる
+# - Action はコミット SHA で固定する（コメントは対応するタグ）
+name: ci
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  schedule:
+    # CodeQL などを週1回（月曜 12:00 JST）実行する
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  static-analysis:
+    name: static-analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
+
+  unit-and-property:
+    name: unit-and-property
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Unit and property tests
+        run: npm test
+
+  integration-security:
+    name: integration-security
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # Firestore Emulator は Java が必要
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      # Emulator の統合テスト（出力は logs/test-output.log に保存）→ ログの個人情報スキャン
+      # ログは個人情報が漏れていた場合に再び広がらないよう、成果物としてアップロードしない
+      - name: Integration tests and log scan
+        run: npm run test:security
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 履歴全体を検査する
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install gitleaks (checksum verified)
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks"
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/gitleaks" gitleaks
+          echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      - name: Scan repository history
+        run: gitleaks git --config .gitleaks.toml --redact --verbose --exit-code 1 .
+
+  dependency-audit:
+    name: dependency-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # 本番の依存: high 以上で失敗（必須）
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high --omit=dev
+      # 開発用の依存: 結果は警告として表示するだけ（扱いは運用で決める。設計書 (c)）
+      - name: Audit all dependencies (warning only)
+        run: |
+          if ! npm audit --audit-level=high; then
+            echo "::warning title=dependency-audit::開発用の依存に high 以上の脆弱性があります（npm audit を確認してください）"
+          fi
+
+  codeql:
+    name: codeql
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: javascript-typescript
+          build-mode: none
+      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: /language:javascript-typescript
+
+  index-consistency:
+    name: index-consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # gen-indexes（scripts/gen-indexes.ts）の実装前は成功とする。
+      # 実装後は、再生成した firestore.indexes.json がコミット済みのものと一致することを検査する。
+      - name: Check generated indexes
+        run: |
+          if [ ! -f scripts/gen-indexes.ts ]; then
+            echo "scripts/gen-indexes.ts is not implemented yet; skipping the diff check."
+            exit 0
+          fi
+          npm ci
+          npm run gen-indexes
+          git diff --exit-code -- firebase/firestore.indexes.json

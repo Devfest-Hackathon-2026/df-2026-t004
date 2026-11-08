@@ -1,0 +1,45 @@
+name: ユーザー作業
+description: 開発者本人が手作業で行う作業（Google Cloud や GitHub の設定、課金、同意など。AI や CI では代行できない）
+title: "[UW-] "
+labels: ["user-task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > このIssueは開発者本人が行う作業です。AI（Kiro）は実行しません。課金、ログイン、同意、リポジトリの保護など、権限を持つ人だけができる作業です。
+
+        タイトルは `[UW-GC-番号]`（Google Cloud）または `[UW-GH-番号]`（GitHub）で始めます。
+        **シークレットの値（API キー、パスワード、トークン）は、この Issue に書かないでください。**
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      value: |
+        - 作業:
+        - 担当:
+        - 優先度: MVP（必須）
+        - 手順書: [docs/google-cloud-setup.md](https://github.com/yunamaki3/GDGoC2026/blob/main/docs/google-cloud-setup.md) / [docs/github-setup.md](https://github.com/yunamaki3/GDGoC2026/blob/main/docs/github-setup.md) の 手順
+        - タイミング:
+    validations:
+      required: true
+  - type: textarea
+    id: blocked-by
+    attributes:
+      label: 完了前提（これが終わるまで着手できない）
+      value: なし（すぐに着手できる）
+  - type: textarea
+    id: blocking
+    attributes:
+      label: このIssueの完了を待っているもの
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了の条件
+      placeholder: |
+        - [ ] …を設定した
+        - [ ] …で確認した
+      value: |
+        - [ ]
+        - [ ] 控えるべき設定値を記録した（シークレットの値は Issue やリポジトリに書かない）
+    validations:
+      required: true

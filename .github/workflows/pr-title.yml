@@ -1,0 +1,35 @@
+# PR タイトルの検査（Requirement 15.10）
+#
+# 必須チェック名は `pr-title`（docs/github-setup.md の手順2）。
+# タイトルだけを直したとき（edited）にも再実行できるよう、ci.yml とは別のワークフローにしている。
+# （失敗したジョブを「Re-run」しても、古いタイトルで検査されるため）
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    name: pr-title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # タイトルは環境変数で渡す（${{ }} を run に直接埋め込むとコマンド注入になりうる）
+      - name: Check PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/check-pr-title.mjs

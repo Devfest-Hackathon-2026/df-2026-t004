@@ -13,16 +13,17 @@ service cloud.firestore {
     }
 
     // API だけが変更できるフラグ。クライアントからの作成・変更を拒否する。
-    function serverFlagsUntouched() {
-      return request.resource.data.diff(resource == null ? {} : resource.data)
-        .affectedKeys()
-        .hasAny(['deleting', 'sensitiveLocked']) == false;
+    function serverFlags() {
+      return ['deleting', 'sensitiveLocked'];
     }
 
     // 世帯情報・子どもの情報・同意の記録
     match /users/{uid} {
       allow read, delete: if isOwner(uid);
-      allow create, update: if isOwner(uid) && serverFlagsUntouched();
+      allow create: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(serverFlags());
+      allow update: if isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverFlags());
 
       // 要配慮情報: 読み取りは本人のみ（撤回の削除に失敗してロック中は拒否）。
       // 書き込みは API 経由のみで、クライアントからは本人でも拒否する。
