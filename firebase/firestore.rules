@@ -1,11 +1,48 @@
 rules_version = '2';
 
-// 初版: すべての読み取り・書き込みを拒否する。
-// 所有者のみ許可するルールはタスク 2.3 で追加する。
+// クライアントからの直接アクセスの規則（Requirement 9.6, 9.7, 15.2）
+// - 実際の書き込みは原則として API（Admin SDK、規則の対象外）で行う。
+// - ここに書いていないパスは、すべて拒否する（既定で拒否）。
+//   sources / chunks / fetchLogs / config / usage / usageUsers / deletionJobs は
+//   クライアントから読み書きできない。
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // API だけが変更できるフラグ。クライアントからの作成・変更を拒否する。
+    function serverFlagsUntouched() {
+      return request.resource.data.diff(resource == null ? {} : resource.data)
+        .affectedKeys()
+        .hasAny(['deleting', 'sensitiveLocked']) == false;
+    }
+
+    // 世帯情報・子どもの情報・同意の記録
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && serverFlagsUntouched();
+
+      // 要配慮情報: 読み取りは本人のみ（撤回の削除に失敗してロック中は拒否）。
+      // 書き込みは API 経由のみで、クライアントからは本人でも拒否する。
+      match /sensitive/{docId} {
+        allow read: if isOwner(uid)
+          && exists(/databases/$(database)/documents/users/$(uid))
+          && get(/databases/$(database)/documents/users/$(uid)).data.get('sensitiveLocked', false) != true;
+        allow write: if false;
+      }
+
+      // 申請状況・医療費記録・チャット履歴・通知トークン・お知らせなど
+      match /{subcollection}/{docId} {
+        allow read, write: if isOwner(uid) && subcollection != 'sensitive';
+      }
+    }
+
+    // 制度の構造化情報: 認証済みの読み取りのみ
+    match /programs/{programId} {
+      allow read: if request.auth != null;
+      allow write: if false;
     }
   }
 }
