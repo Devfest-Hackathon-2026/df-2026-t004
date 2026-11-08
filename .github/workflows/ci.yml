@@ -108,8 +108,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/gitleaks"
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/gitleaks" gitleaks
           echo "$RUNNER_TEMP/gitleaks" >> "$GITHUB_PATH"
+      # 検査するのは、チェックアウトしたコミット（PR ではマージ後の状態）に至る履歴だけ。
+      # 既定の --all だと、fetch-depth: 0 で取得した他のブランチまで検査してしまい、
+      # 別の人の作業中のブランチの検出で main や無関係な PR まで失敗する。
       - name: Scan repository history
-        run: gitleaks git --config .gitleaks.toml --redact --verbose --exit-code 1 .
+        run: gitleaks git --config .gitleaks.toml --redact --verbose --exit-code 1 --log-opts="--full-history HEAD" .
 
   dependency-audit:
     name: dependency-audit
