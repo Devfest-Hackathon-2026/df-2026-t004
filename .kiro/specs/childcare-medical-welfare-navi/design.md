@@ -525,7 +525,7 @@ stateDiagram-v2
 | 超過時 | 質問を受け付けず、`quota_user` / `quota_global` / `ops_stopped` を返す。画面は理由と再開時刻（上限は翌日0時（日本時間））または問い合わせ窓口を表示し、入力した質問文を保持する |
 | 質問と出力の上限 | `limits.maxQuestionChars`（500）、`limits.maxOutputTokens` を生成呼び出しに渡す。達した場合は打ち切る |
 | 収集の上限 | `collector.maxPagesPerRun`（100）、`collector.maxPdfPerSource`（10）、`maxRetries`（3） |
-| 後始末 | 古い `usage*` ドキュメントは TTL ポリシー（`expireAt`）で自動削除する |
+| 後始末 | 古い `usage*` ドキュメントは TTL ポリシー（Timestamp 型の `expireAt`）で自動削除する |
 
 #### Operations_Switch
 
@@ -910,8 +910,8 @@ type ChatRecord = {
   answer: string; citations: Array<{ n: number; chunkId: string; sourceUrl: string; title: string }>;
   createdAt: string;
 };
-type UsageDoc = { count: number; expireAt: string };           // TTL 対象
-type DeletionJob = { state: "running" | "failed" | "done"; attempts: number; updatedAt: string; expireAt: string };
+type UsageDoc = { count: number; expireAt: Timestamp };       // TTL 対象（Firestore Timestamp 型）
+type DeletionJob = { state: "running" | "failed" | "done"; attempts: number; updatedAt: string; expireAt: Timestamp }; // expireAt は TTL 対象（Firestore Timestamp 型）
 type OperationsDoc = { aiEnabled: boolean; collectionEnabled: boolean; updatedAt: string; updatedBy: string };
 type SourceDoc = {
   id: string; url: string; municipalityCode: string; level: "national" | "tokyo" | "city";
@@ -952,7 +952,7 @@ type SourceDoc = {
 | 制度限定 | `programId` + `searchable` + ベクトル | 1 |
 | 合計 | 1つの埋め込み版あたり | 17 |
 
-`chunks` 以外では、`sources`（`status`, `lastFetchedAt`）、`programs`（`municipalityCode`, `verified`, `needsReview`, `category`）の単一または小さな複合インデックスを使う。TTL ポリシーは `usage`, `usageUsers`, `deletionJobs` の `expireAt` に設定する。
+`chunks` 以外では、`sources`（`status`, `lastFetchedAt`）、`programs`（`municipalityCode`, `verified`, `needsReview`, `category`）の単一または小さな複合インデックスを使う。TTL ポリシーは `usage`, `usageUsers`, `deletionJobs` の `expireAt` に設定する。TTL ポリシーは Timestamp 型のフィールドにのみ有効なため、`expireAt` は ISO 文字列ではなく Firestore の Timestamp 型で保存する。
 
 ### 設定ファイル `config/app.config.json`
 
@@ -1439,7 +1439,7 @@ prework の結果から、次の統合を行った。
 | Secret Manager | 秘密情報の登録と Cloud Run への注入 | 9.10 |
 | Vertex AI | リクエスト・レスポンスのログ出力を有効にしない。保持条件を確認し、プライバシーポリシーに反映する | 9.15 |
 | インデックス | `firebase deploy --only firestore:indexes` と `verify-indexes` | 13.14 |
-| TTL ポリシー | `usage`, `usageUsers`, `deletionJobs` の `expireAt` | 13 |
+| TTL ポリシー | `usage`, `usageUsers`, `deletionJobs` の `expireAt`（Timestamp 型） | 13 |
 | 運営者権限 | 運営者の `gcloud auth application-default login` と、`grant-admin` による `admin` クレームの付与 | 3.16 |
 | 運営スイッチ | `config/operations` の初期ドキュメント作成 | 13.11 |
 
