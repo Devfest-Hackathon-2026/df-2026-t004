@@ -18,28 +18,28 @@
 
 ### フェーズ0: 足場・セキュリティテスト・CI
 
-- [ ] 1. モノレポの足場を作る
+- [x] 1. モノレポの足場を作る
   - ブランチ: `build/monorepo-bootstrap` ／ type: `build` ／ PR タイトル例: `build: bootstrap TypeScript monorepo`
   - _Requirements: 13.6, 13.7, 15.5_
-  - [ ] 1.1 ルートの設定を作る
+  - [x] 1.1 ルートの設定を作る
     - npm workspaces（`packages/shared`、`api`、`collector`、`admin`、`eval`、`web`）、Node.js 22 の指定（`.nvmrc`、`engines`）
     - `tsconfig.base.json`（`strict: true`）、各パッケージの `tsconfig.json`、ルートの `npm run typecheck`
     - ESLint（TypeScript、`eslint-plugin-security`）、Prettier、`npm run lint`
     - Vitest と fast-check（`numRuns` の既定を100以上にする共通設定）、`npm test`
     - 依存パッケージは固定バージョン（範囲指定なし）で追加する
     - _Requirements: 15.5_
-  - [ ] 1.2 空のパッケージを作る
+  - [x] 1.2 空のパッケージを作る
     - 6つのパッケージに `package.json`、`src/index.ts`、`test/` を置き、型検査・lint・テストが通る最小の状態にする
     - `packages/shared` を他のパッケージから参照できるようにする
     - _Requirements: 13.6_
-  - [ ] 1.3 設定ファイルと `loadConfig` を作る
+  - [x] 1.3 設定ファイルと `loadConfig` を作る
     - `config/app.config.json` の雛形（`region`、`ai.*Model`、`embedding.*`、`rag.*`、`limits.*`、`rateLimit.*`、`collector.*`）。モデル名はプレースホルダのまま（未確認事項 U-5）
     - `packages/shared` に zod スキーマと `loadConfig`。必須キーの欠落・空をすべてのキー名つきで報告して失敗する
     - _Requirements: 13.6, 13.7_
   - [ ]* 1.4 `loadConfig` のプロパティテストを書く
     - **Property 39: 設定の検証**
     - **Validates: Requirements 13.6, 13.7**
-  - [ ] 1.5 Firebase Emulator の設定を作る
+  - [x] 1.5 Firebase Emulator の設定を作る
     - `firebase.json`（Firestore と Authentication の Emulator）、`firebase/firestore.rules`（初版は全拒否）、`firebase/firestore.indexes.json`（空）
     - `npm run test:integration` で Emulator を起動してテストを実行するスクリプト
     - _Requirements: 15.2_
