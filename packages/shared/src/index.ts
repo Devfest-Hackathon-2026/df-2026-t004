@@ -1,2 +1,3 @@
-// 共有パッケージのエントリ（雛形はタスク 1.2 で拡充する）
-export {};
+// 共有パッケージの公開エントリ。
+// 後続タスクで、各パッケージ共通の型・定数・純粋関数をここから再エクスポートする。
+export const SHARED_PACKAGE = "@hachioji-gov/shared" as const;
