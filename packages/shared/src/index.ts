@@ -4,3 +4,4 @@ export const SHARED_PACKAGE = "@hachioji-gov/shared" as const;
 
 export * from "./config.js";
 export * from "./authorize.js";
+export * from "./log.js";
