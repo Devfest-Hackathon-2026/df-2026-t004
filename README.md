@@ -39,7 +39,7 @@ npm ci
 | `npm run test:integration`                | Firebase Emulator（Auth + Firestore）で統合テストを実行し、出力を `logs/test-output.log` に保存する |
 | `npm run test:log-scan`                   | 保存したログに、電話番号・メール・郵便番号・シークレット・質問文のカナリアが無いことを検査する      |
 | `npm run test:security`                   | `test:integration` と `test:log-scan` を続けて実行する                                              |
-| `npm run secret-scan`                     | gitleaks でリポジトリの履歴全体を検査する（gitleaks v8.25 以上を別途インストール）                  |
+| `npm run secret-scan`                     | gitleaks で、いまのブランチ（HEAD）に至る履歴を検査する（gitleaks v8.25 以上を別途インストール）    |
 | `npm run secret-scan:staged`              | gitleaks でコミット前のステージ済みの変更を検査する                                                 |
 
 PR を出す前に、少なくとも `typecheck`・`lint`・`test` を通してください。Java と gitleaks が無い環境では、`test:security` と `secret-scan` は CI に任せて構いません。
@@ -70,7 +70,7 @@ PR では次の8つのチェックが実行され、すべて成功しないと�
 | `static-analysis`      | 型検査、ESLint、Prettier                                                                             | `ci.yml`       |
 | `unit-and-property`    | Vitest（ユニット + fast-check）                                                                      | `ci.yml`       |
 | `integration-security` | Emulator での所有者以外のアクセス拒否・Security Rules のテストと、ログのスキャン                     | `ci.yml`       |
-| `secret-scan`          | gitleaks（履歴全体）                                                                                 | `ci.yml`       |
+| `secret-scan`          | gitleaks（PR のマージ後の状態に至る履歴）                                                            | `ci.yml`       |
 | `dependency-audit`     | `npm audit --audit-level=high --omit=dev`（開発用の依存は警告のみ）                                  | `ci.yml`       |
 | `codeql`               | CodeQL（JavaScript/TypeScript）。週1回の定期実行もある                                               | `ci.yml`       |
 | `index-consistency`    | `gen-indexes` の出力とコミット済みの `firestore.indexes.json` の一致（生成スクリプトの実装前は成功） | `ci.yml`       |
