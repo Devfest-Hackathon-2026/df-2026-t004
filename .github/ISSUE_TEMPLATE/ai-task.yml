@@ -1,0 +1,63 @@
+name: AI タスク
+description: tasks.md の実装タスク（AI と開発者が一緒に実装し、PR でマージするもの）
+title: "[T00] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        tasks.md のタスク1つにつき Issue を1つ作ります。タイトルは `[T番号] タスク名` にします。
+        type・優先度・フェーズ・担当のラベルを付けてください（例: `security`、`priority:mvp`、`phase:0`、`owner:A-lead`）。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: tasks.md のタスク番号と名前、担当、優先度、フェーズ、ブランチ名と type、PR タイトルの例、対応する要件
+      value: |
+        tasks.md のタスク N「」。
+
+        - 担当:
+        - 優先度: MVP（必須）
+        - フェーズ:
+        - `<type>/<短い説明>` ／ type: `` ／ PR タイトル例: ``
+        - 対応する要件: Requirement
+    validations:
+      required: true
+  - type: textarea
+    id: blocked-by
+    attributes:
+      label: 完了前提（これが終わるまで着手できない）
+      placeholder: "- #2（T01 モノレポの足場を作る）"
+      value: なし（すぐに着手できる）
+  - type: textarea
+    id: blocking
+    attributes:
+      label: このIssueの完了を待っているもの
+      placeholder: "- #4（T03 CI とリポジトリの保護を作る）"
+  - type: textarea
+    id: work
+    attributes:
+      label: 作業内容
+      description: tasks.md のサブタスク（任意のものには `（任意）` を付ける）
+      placeholder: |
+        - [ ] N.1 …
+        - [ ] N.2 …
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了の条件
+      value: |
+        - [ ] 任意（`*`）以外のサブタスクがすべて完了している
+        - [ ] セキュリティ関連のテストが通っている
+        - [ ] CI の必須チェックがすべて成功し、PR が `main` にマージされている
+        - [ ] tasks.md の該当タスクにチェックを付けた
+  - type: textarea
+    id: refs
+    attributes:
+      label: 参照
+      value: |
+        - [tasks.md](https://github.com/yunamaki3/GDGoC2026/blob/main/.kiro/specs/childcare-medical-welfare-navi/tasks.md)
+        - [requirements.md](https://github.com/yunamaki3/GDGoC2026/blob/main/.kiro/specs/childcare-medical-welfare-navi/requirements.md)
+        - [design.md](https://github.com/yunamaki3/GDGoC2026/blob/main/.kiro/specs/childcare-medical-welfare-navi/design.md)
+        - [commit-convention.md](https://github.com/yunamaki3/GDGoC2026/blob/main/docs/commit-convention.md)

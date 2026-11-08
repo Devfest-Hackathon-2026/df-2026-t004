@@ -1,0 +1,9 @@
+# 空の Issue は作らせない（テンプレートのどれかを選ぶ）
+blank_issues_enabled: false
+contact_links:
+  - name: 脆弱性の報告（非公開）
+    url: https://github.com/yunamaki3/GDGoC2026/security/advisories/new
+    about: 他人のデータが見える、認証を回避できるなどの問題は、公開の Issue ではなくこちらから報告してください。
+  - name: 開発のルール
+    url: https://github.com/yunamaki3/GDGoC2026/blob/main/README.md
+    about: ブランチ運用、コミット規約、必須チェック、ローカルでの実行方法

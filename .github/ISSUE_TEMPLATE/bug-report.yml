@@ -1,0 +1,52 @@
+name: バグ報告
+description: 期待どおりに動かないものを報告する
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **実在の個人情報（氏名、電話番号、メール、住所）、質問文の原文、シークレットは書かないでください。**
+        スクリーンショットを貼る場合も、個人情報が写っていないか確認してください。
+
+        脆弱性（他人のデータが見える、認証を回避できるなど）は、この公開 Issue ではなく
+        [非公開の脆弱性報告](https://github.com/yunamaki3/GDGoC2026/security/advisories/new) で知らせてください。
+  - type: textarea
+    id: what
+    attributes:
+      label: 起きたこと
+      description: 何をしたら、何が起きたか
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待した動作
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1. …を開く
+        2. …を押す
+        3. …と表示される
+  - type: dropdown
+    id: area
+    attributes:
+      label: 場所
+      options:
+        - web（画面）
+        - api
+        - collector（収集ジョブ）
+        - admin（運営者の CLI）
+        - shared
+        - Firestore のルール・インデックス
+        - CI / GitHub
+        - わからない
+  - type: input
+    id: env
+    attributes:
+      label: 環境
+      placeholder: "例: iPhone / Safari 18、Windows 11 / Chrome、ローカル（npm run …）"
