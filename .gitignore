@@ -18,6 +18,7 @@ service-account*.json
 
 # ログ・一時ファイル
 *.log
+logs/
 npm-debug.log*
 .DS_Store
 Thumbs.db
