@@ -44,59 +44,59 @@
     - `npm run test:integration` で Emulator を起動してテストを実行するスクリプト
     - _Requirements: 15.2_
 
-- [ ] 2. セキュリティテストの土台を作る
+- [x] 2. セキュリティテストの土台を作る
   - ブランチ: `security/ownership-and-log-tests` ／ type: `security` ／ PR タイトル例: `security: add ownership, rules and log redaction tests`
   - 機能を実装する前に、所有者以外のアクセスを拒否することと、ログに個人情報を出さないことを検査する仕組みを作る
   - _Requirements: 9.6, 9.7, 15.1, 15.2, 15.3_
-  - [ ] 2.1 `authorizeAccess` を実装する（`packages/shared`）
+  - [x] 2.1 `authorizeAccess` を実装する（`packages/shared`）
     - 認証済みで、トークンの `uid` とパスの `uid` が等しいときだけ許可する。未認証は 401、不一致は 403
     - _Requirements: 9.6, 9.7_
-  - [ ] 2.2 `authorizeAccess` のプロパティテストを書く（必須）
+  - [x] 2.2 `authorizeAccess` のプロパティテストを書く（必須）
     - **Property 48: 所有者以外のアクセス拒否**
     - **Validates: Requirements 9.6, 9.7, 15.2**
-  - [ ] 2.3 Firestore Security Rules の初版とテストを作る
+  - [x] 2.3 Firestore Security Rules の初版とテストを作る
     - `users/{uid}/**` は本人のみ読み書き可。`sensitive` は API 経由のみ（クライアントからは書き込み不可）
     - `programs` は認証済みの読み取りのみ。`chunks`、`sources`、`fetchLogs`、`config`、`usage`、`usageUsers`、`deletionJobs` はクライアントから全拒否
     - `@firebase/rules-unit-testing` で、データ区分（世帯情報、子どもの情報、申請状況、医療費記録、チャット履歴）ごとに、本人は許可、他人と未認証は拒否、拒否後にデータが変わらないことを検査する
     - _Requirements: 9.6, 9.7, 15.2_
-  - [ ] 2.4 API の所有者検査の統合テストの雛形を作る（`packages/api`）
+  - [x] 2.4 API の所有者検査の統合テストの雛形を作る（`packages/api`）
     - Emulator 上で、データ区分ごとに「他人の読み取り・書き込みは 403」「未認証は 401」「対象データは変わらない」を表形式で検査するテストのひな形とヘルパー（テスト用ユーザーの作成、ID トークンの取得）
     - エンドポイントの実装前は、ダミーのルートで動くことを確認し、エンドポイントを追加するたびに表へ1行足す運用にする
     - _Requirements: 15.1, 15.2_
-  - [ ] 2.5 ログの許可リスト `redactForLog` と構造化ロガーを作る（`packages/shared`）
+  - [x] 2.5 ログの許可リスト `redactForLog` と構造化ロガーを作る（`packages/shared`）
     - 出力してよいキーは、リクエストID、ステータス、所要時間、エラー種別、件数だけ。例外メッセージにリクエストの内容が入っている場合も除去する
     - _Requirements: 15.3_
-  - [ ] 2.6 `redactForLog` のプロパティテストを書く（必須）
+  - [x] 2.6 `redactForLog` のプロパティテストを書く（必須）
     - **Property 49: ログの許可リスト**
     - **Validates: Requirements 15.3**
-  - [ ] 2.7 ログ出力の個人情報スキャンを作る
+  - [x] 2.7 ログ出力の個人情報スキャンを作る
     - テスト実行中のログを収集し、電話番号・メールアドレス・テストで使った質問文の本文・シークレットらしい文字列が含まれていないことを検査するスクリプトとテスト
     - _Requirements: 15.3_
-  - [ ] 2.8 gitleaks の設定を作る
+  - [x] 2.8 gitleaks の設定を作る
     - `.gitleaks.toml`（既定ルール + テスト用ダミー値の許可）。ローカルで実行する npm スクリプト
     - _Requirements: 15.3_
 
-- [ ] 3. CI とリポジトリの保護を作る
+- [x] 3. CI とリポジトリの保護を作る
   - ブランチ: `ci/add-security-workflows` ／ type: `ci` ／ PR タイトル例: `ci: add security and test workflows`
   - 前提: UW-GH-1（リポジトリで使える機能の確認）。この PR の後に UW-GH-3（ブランチ保護と必須チェックの登録）を行う
   - _Requirements: 15.1, 15.4, 15.5, 15.6, 15.7, 15.10, 15.11_
-  - [ ] 3.1 `.github/workflows/ci.yml` を作る
+  - [x] 3.1 `.github/workflows/ci.yml` を作る
     - `pull_request`（opened、synchronize、reopened）と `main` への push で実行。`paths:` で絞らない
     - ジョブ名は docs/github-setup.md の手順2と一致させる: `static-analysis`（`tsc --noEmit`、ESLint）、`unit-and-property`（Vitest）、`integration-security`（Emulator の統合テストとログのスキャン）、`secret-scan`（gitleaks）、`dependency-audit`（`npm audit --audit-level=high --omit=dev`）、`codeql`、`index-consistency`、`pr-title`
     - 既定の権限は `contents: read`。`codeql` だけ `security-events: write`。サードパーティの Action はコミット SHA で固定する
     - `index-consistency` は、`gen-indexes` の実装前は「生成スクリプトがなければ成功」とし、実装後は再生成との差分を検査する
     - _Requirements: 15.1, 15.4, 15.5, 15.6, 15.11_
-  - [ ] 3.2 PR タイトルの検査を作る
+  - [x] 3.2 PR タイトルの検査を作る
     - `pr-title` ジョブで、PR タイトルが commit-convention の形式（`<type>(<scope>)!: <summary>`、type は一覧のもの、72文字以内）であることを検査する
     - _Requirements: 15.10_
-  - [ ] 3.3 Dependabot の設定を作る
+  - [x] 3.3 Dependabot の設定を作る
     - `.github/dependabot.yml`: `npm`（ルート）と `github-actions` を週次で更新。コミットの接頭辞を `build(deps)` にして `pr-title` を通るようにする
     - _Requirements: 15.4_
-  - [ ] 3.4 PR・Issue テンプレートを作る
+  - [x] 3.4 PR・Issue テンプレートを作る
     - `.github/pull_request_template.md`（概要、type、テスト結果、シークレット・個人情報を含めていない確認、関連 Issue）
     - `.github/ISSUE_TEMPLATE/`（AI タスク、ユーザー作業、バグ報告）と `config.yml`
     - _Requirements: 15.9, 15.10_
-  - [ ] 3.5 開発ルールを README にまとめる
+  - [x] 3.5 開発ルールを README にまとめる
     - ブランチ運用、コミット規約、必須チェック、ローカルでの実行方法（typecheck、lint、test、test:integration、gitleaks）
     - _Requirements: 15.8, 15.9, 15.10_
 
