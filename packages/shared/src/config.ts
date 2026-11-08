@@ -89,8 +89,7 @@ export interface ConfigError {
 }
 
 export type LoadConfigResult =
-  | { ok: true; config: AppConfig }
-  | { ok: false; missingKeys: string[]; errors: ConfigError[] };
+  { ok: true; config: AppConfig } | { ok: false; missingKeys: string[]; errors: ConfigError[] };
 
 // 入力の中の、パスが指す値を取り出す（キーの欠落の判定に使う）
 function valueAt(raw: unknown, path: readonly PropertyKey[]): unknown {
