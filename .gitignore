@@ -1,0 +1,30 @@
+# 依存関係
+node_modules/
+
+# ビルド成果物
+dist/
+build/
+coverage/
+.firebase/
+
+# 環境変数・シークレット（絶対にコミットしない）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+*-credentials.json
+
+# ログ・一時ファイル
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# エディタ
+.vscode/
+.idea/
+
+# Kiro のローカル設定（仕様書とステアリングは管理する）
+.kiro/settings/
