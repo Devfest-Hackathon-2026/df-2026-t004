@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// 初版: すべての読み取り・書き込みを拒否する。
+// 所有者のみ許可するルールはタスク 2.3 で追加する。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
