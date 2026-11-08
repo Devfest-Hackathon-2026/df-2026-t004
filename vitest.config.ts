@@ -2,7 +2,11 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    include: ["packages/*/src/**/*.test.ts", "packages/*/test/**/*.test.ts"],
+    include: [
+      "packages/*/src/**/*.test.ts",
+      "packages/*/test/**/*.test.ts",
+      "scripts/**/*.test.mjs",
+    ],
     // 統合テストは Emulator が必要なため、通常の npm test には含めない
     exclude: [
       "**/node_modules/**",
