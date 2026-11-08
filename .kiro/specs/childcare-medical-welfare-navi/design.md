@@ -65,7 +65,7 @@ flowchart LR
   GH["GitHub Actions\nPR時のCI"]
 
   UI -->|静的資産| HOST
-  UI -->|登録・ログイン (クライアントSDKで直接)| AUTH
+  UI -->|"登録・ログイン（クライアントSDKで直接）"| AUTH
   UI -->|ID トークン + HTTPS + SSE| API
   API -->|ID トークン検証 / アカウント削除| AUTH
   API -->|Admin SDK| FS
@@ -494,8 +494,8 @@ LLM 判定は誤りうる。判定の誤りは評価セットの「根拠範囲�
 ```mermaid
 stateDiagram-v2
   [*] --> 未確認 : 収集で作成
-  未確認 --> 確認済み : 運営者が確認 (applyVerification)
-  確認済み --> 要再確認 : ハッシュ変化 (applyContentChange)
+  未確認 --> 確認済み : 運営者が確認（applyVerification）
+  確認済み --> 要再確認 : ハッシュ変化（applyContentChange）
   要再確認 --> 確認済み : 運営者が再確認
   確認済み --> 確認済み : ハッシュ同一
 ```
