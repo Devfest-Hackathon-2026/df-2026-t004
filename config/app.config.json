@@ -1,0 +1,34 @@
+{
+  "region": "asia-northeast1",
+  "ai": {
+    "generationModel": "<設定する>",
+    "judgeModel": "<設定する>",
+    "intentModel": "<設定する>",
+    "location": "asia-northeast1",
+    "maxOutputTokens": 1024
+  },
+  "embedding": {
+    "model": "gemini-embedding-001",
+    "dimensions": 768,
+    "version": "v1",
+    "fieldPrefix": "emb_"
+  },
+  "search": { "topK": 5, "minSimilarity": 0.0, "parallelQueryLimit": 21 },
+  "limits": { "maxQuestionChars": 500, "perUserPerDay": 20, "globalPerDay": 500 },
+  "rateLimit": {
+    "perUserPerMinute": 60,
+    "perIpPerMinute": 120,
+    "windowSec": 60,
+    "maxEntries": 10000
+  },
+  "operations": { "cacheTtlSec": 5, "maxStaleSec": 10 },
+  "collector": {
+    "maxPagesPerRun": 100,
+    "maxPdfPerSource": 10,
+    "maxRetries": 3,
+    "timeoutSec": 30,
+    "defaultIntervalHours": 24
+  },
+  "chat": { "maxRegenerations": 1, "firstTokenTimeoutSec": 30 },
+  "offline": { "maxCachedPrograms": 50, "networkTimeoutSec": 5 }
+}

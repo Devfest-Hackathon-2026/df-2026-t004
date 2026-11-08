@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+package-lock.json
+.kiro/
+# 既存のドキュメントは整形の対象外（手順書の体裁を保つ）
+docs/
