@@ -11,6 +11,9 @@
       "default": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "zod": "3.23.8"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"
   }
