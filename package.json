@@ -14,7 +14,10 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:integration": "firebase emulators:exec --only firestore,auth --project demo-hachioji-gov \"vitest run --config vitest.integration.config.ts\"",
+    "test:integration": "node scripts/capture-output.mjs logs/test-output.log npm run test:integration:raw",
+    "test:integration:raw": "firebase emulators:exec --only firestore,auth --project demo-hachioji-gov \"vitest run --config vitest.integration.config.ts\"",
+    "test:log-scan": "vitest run --config vitest.logscan.config.ts",
+    "test:security": "npm run test:integration && npm run test:log-scan",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
