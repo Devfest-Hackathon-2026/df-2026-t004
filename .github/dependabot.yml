@@ -1,0 +1,46 @@
+# Dependabot version updates（Requirement 15.4）
+# 更新の PR にも同じ必須チェックが走る。タイトルが pr-title に通るよう、
+# コミットの接頭辞を `build(deps)` にしている（例: "build(deps): bump hono from 4.13.13 to 4.13.14"）。
+version: 2
+
+updates:
+  # npm workspaces のため、ルートの package-lock.json で全パッケージをまとめて更新する
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    # 公開直後の版は避ける（依存は公開から2週間以上たった固定バージョンを使う方針）。
+    # セキュリティ更新（security updates）にはこの待ち期間は適用されない
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    commit-message:
+      prefix: build
+      include: scope
+    labels:
+      - build
+    groups:
+      # 開発用の依存のマイナー・パッチ更新は1つの PR にまとめる
+      npm-dev:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      include: scope
+    labels:
+      - build
