@@ -7,6 +7,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@hachioji-gov/shared": "*"
+    "@google/genai": "2.30.0",
+    "@hachioji-gov/shared": "*",
+    "cheerio": "1.2.0",
+    "firebase-admin": "14.5.0",
+    "unpdf": "1.9.1"
   }
 }
