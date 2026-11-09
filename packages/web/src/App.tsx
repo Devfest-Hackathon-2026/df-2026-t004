@@ -6,6 +6,7 @@ import { PRIVACY, TERMS } from "./legal/content";
 import { routeFor, type SessionState } from "./lib/routing";
 import { showsTabBar } from "./lib/tabs";
 import { Auth } from "./screens/Auth";
+import { Home, Search } from "./screens/Dashboard";
 import { LegalPage } from "./screens/Legal";
 import { MyHomePlaceholder, Placeholder } from "./screens/Placeholder";
 import { OnbChildren, OnbConsent, OnbPostal } from "./screens/Onboarding";
@@ -52,14 +53,8 @@ export default function App() {
                   <Route path="/onboarding/postal" element={<OnbPostal />} />
                   <Route path="/onboarding/children" element={<OnbChildren />} />
                   <Route path="/onboarding/consent" element={<OnbConsent />} />
-                  <Route
-                    path="/home"
-                    element={<Placeholder title="ホーム" task="T23（#24）" withInstallHint />}
-                  />
-                  <Route
-                    path="/search"
-                    element={<Placeholder title="さがす" task="T23（#24）" />}
-                  />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/search" element={<Search />} />
                   <Route path="/chat" element={<Placeholder title="AI相談" task="T24（#25）" />} />
                   <Route path="/my" element={<MyHomePlaceholder />} />
                   <Route path="/programs/:id" element={<ProgramDetail />} />
