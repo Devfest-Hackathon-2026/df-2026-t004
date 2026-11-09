@@ -5,11 +5,11 @@ import { TabBar } from "./components/ui";
 import { PRIVACY, TERMS } from "./legal/content";
 import { routeFor, type SessionState } from "./lib/routing";
 import { showsTabBar } from "./lib/tabs";
+import { Deleted, ExpenseForm, Expenses, MyHome } from "./screens/Account";
 import { Auth } from "./screens/Auth";
 import { Chat } from "./screens/Chat";
 import { Home, Search } from "./screens/Dashboard";
 import { LegalPage } from "./screens/Legal";
-import { MyHomePlaceholder } from "./screens/Placeholder";
 import { OnbChildren, OnbConsent, OnbPostal } from "./screens/Onboarding";
 import { ProgramDetail } from "./screens/ProgramDetail";
 import { useSession } from "./state/session";
@@ -57,7 +57,11 @@ export default function App() {
                   <Route path="/home" element={<Home />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/chat" element={<Chat />} />
-                  <Route path="/my" element={<MyHomePlaceholder />} />
+                  <Route path="/my" element={<MyHome />} />
+                  <Route path="/my/expenses" element={<Expenses />} />
+                  <Route path="/my/expenses/new" element={<ExpenseForm />} />
+                  <Route path="/my/expenses/:id" element={<ExpenseForm />} />
+                  <Route path="/deleted" element={<Deleted />} />
                   <Route path="/programs/:id" element={<ProgramDetail />} />
                   <Route path="/terms" element={<LegalPage doc={TERMS} />} />
                   <Route path="/privacy" element={<LegalPage doc={PRIVACY} />} />

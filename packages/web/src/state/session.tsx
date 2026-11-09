@@ -11,6 +11,11 @@ import {
   type ReactNode,
 } from "react";
 import { readEnv } from "../lib/env";
+import {
+  createHttpAccountApi,
+  createMockAccountApi,
+  type AccountApi,
+} from "../services/accountApi";
 import { createHttpChatApi, createMockChatApi, type ChatApi } from "../services/chatApi";
 import {
   createHttpDashboardApi,
@@ -67,6 +72,7 @@ type Session = {
   api: HouseholdApi;
   dashboard: DashboardApi;
   chat: ChatApi;
+  account: AccountApi;
   /** undefined は確認中 */
   user: AuthUser | null | undefined;
   /** undefined は読み込み中、null は未登録（オンボーディングが必要） */
@@ -112,6 +118,11 @@ export function SessionProvider({
     () => (env.apiMode === "http" ? createHttpChatApi(() => auth.idToken()) : createMockChatApi()),
     [env, auth],
   );
+  const account = useMemo(
+    () =>
+      env.apiMode === "http" ? createHttpAccountApi(() => auth.idToken()) : createMockAccountApi(),
+    [env, auth],
+  );
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   const [household, setHousehold] = useState<Household | null | undefined>(undefined);
   const [draft, setDraftState] = useState<OnboardingDraft>(EMPTY_DRAFT);
@@ -141,6 +152,7 @@ export function SessionProvider({
       api,
       dashboard,
       chat,
+      account,
       user,
       household,
       setHousehold,
@@ -148,7 +160,7 @@ export function SessionProvider({
       draft,
       setDraft: (f) => setDraftState((d) => f(d)),
     }),
-    [auth, api, dashboard, chat, user, household, reloadHousehold, draft],
+    [auth, api, dashboard, chat, account, user, household, reloadHousehold, draft],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
