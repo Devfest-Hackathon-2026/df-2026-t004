@@ -8,12 +8,7 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 /** 所有者検査の対象となるデータ区分 */
 export type DataCategory =
-  | "household"
-  | "children"
-  | "applications"
-  | "expenses"
-  | "chats"
-  | "sensitive";
+  "household" | "children" | "applications" | "expenses" | "chats" | "sensitive";
 
 export type OwnerRoute = {
   readonly method: HttpMethod;

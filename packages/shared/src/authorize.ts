@@ -2,8 +2,7 @@
 // API のすべての `users/{uid}` 系ルートは、この関数の結果に従って許可・拒否する。
 
 export type AccessDecision =
-  | { readonly allowed: true }
-  | { readonly allowed: false; readonly status: 401 | 403 };
+  { readonly allowed: true } | { readonly allowed: false; readonly status: 401 | 403 };
 
 /**
  * 認証済みで、トークンの uid とパスの uid が等しいときだけ許可する。
