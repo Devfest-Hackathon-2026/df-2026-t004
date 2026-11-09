@@ -62,6 +62,17 @@ function parseJson(text: string | undefined): unknown {
   }
 }
 
+/**
+ * 意図判定の応答を読む。general と読めたときだけ general にする。
+ * 判定できないとき（JSON でない・intent が無い・想定外の値）は、医療の判断として扱う（安全側）。
+ */
+export function intentFromResponse(text: string | undefined): "general" | "medical_judgment" {
+  const parsed = parseJson(text);
+  const intent: unknown =
+    parsed !== null && typeof parsed === "object" ? Reflect.get(parsed, "intent") : undefined;
+  return intent === "general" ? "general" : "medical_judgment";
+}
+
 /** Vertex AI のクライアント（初回使用時に作る。起動を軽くするため） */
 export class VertexChat implements ChatLlm, QueryEmbedder {
   private client: GoogleGenAI | null = null;
@@ -110,10 +121,7 @@ export class VertexChat implements ChatLlm, QueryEmbedder {
         maxOutputTokens: 64,
       },
     });
-    const parsed = parseJson(res.text);
-    const intent: unknown =
-      parsed !== null && typeof parsed === "object" ? Reflect.get(parsed, "intent") : undefined;
-    return intent === "medical_judgment" ? "medical_judgment" : "general";
+    return intentFromResponse(res.text);
   }
 
   async *streamAnswer(input: AnswerInput, signal: AbortSignal): AsyncIterable<string> {
