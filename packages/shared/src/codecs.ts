@@ -1,12 +1,15 @@
 // 保存形式との変換（Requirement 3.4, 14.6）
 // decode は外から来た値を検証してから型付きの値にする。encode は保存する形にする。
-// Program と ExpenseRecord の変換は、型を定義する PR（#73, #74）のマージ後に足す。
 
 import { z } from "zod";
 import { SOURCE_AGE_BANDS } from "./collection.js";
+import { isValidIsoDate } from "./date.js";
+import { AMOUNT_MAX, FACILITY_MAX, type ExpenseRecord } from "./expense.js";
 import { issuesToErrors, type DecodeResult } from "./evaluation.js";
 import type { ChunkDraft } from "./extraction.js";
+import { PROGRAM_CATEGORIES, type Program } from "./programs.js";
 import type { EmbeddingMeta, EmbeddingTarget } from "./reembed.js";
+import { charCount } from "./validation.js";
 
 // chunks/{chunkId}。ベクトル本体（emb_{version}）は Firestore の VectorValue のため、
 // api が別に読み書きする。decode は emb_ のフィールドを読み捨てる
@@ -133,6 +136,94 @@ export function decodeEvalResult(json: string): DecodeResult<EvalResult> {
     return { ok: false, errors: ["(root): JSON として読めません"] };
   }
   const parsed = evalResultSchema.safeParse(raw);
+  return parsed.success
+    ? { ok: true, value: parsed.data }
+    : { ok: false, errors: issuesToErrors(parsed.error) };
+}
+
+// ---- 制度 programs/{programId}（Requirement 3.4） ----
+// ドキュメント ID が id になる。保存する本文には id を入れない
+
+const isoDate = z.string().refine(isValidIsoDate, "日付が不正です");
+const docId = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
+
+const programSchema = z.object({
+  id: docId,
+  sourceId: text,
+  name: text,
+  level: z.enum(["national", "tokyo", "city"]),
+  municipalityCode: z.string().regex(/^\d{5}$/),
+  category: z.enum(PROGRAM_CATEGORIES),
+  ageBands: z.array(z.enum(SOURCE_AGE_BANDS)),
+  summary: z.string().nullable(),
+  eligibility: z.string().nullable(),
+  procedure: z.string().nullable(),
+  requiredDocs: z.array(z.string()).nullable(),
+  deadline: isoDate.nullable(),
+  contact: z
+    .object({ name: text, phone: z.string().optional(), url: z.string().optional() })
+    .nullable(),
+  sourceName: z.string().nullable(),
+  sourceUrl: z.string().nullable(),
+  fetchedAt: z.string().nullable(),
+  verified: z.boolean(),
+  verifiedAt: z.string().optional(),
+  verifiedBy: z.string().optional(),
+  verifiedContentHash: z.string().optional(),
+  contentHash: text,
+  needsReview: z.boolean(),
+  status: z.enum(["active", "excluded"]),
+  updatedAt: z.string(),
+});
+
+function withoutUndefined(value: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined));
+}
+
+/** Firestore に書く形にする（id はドキュメント ID なので本文に入れない） */
+export function encodeProgram(program: Program): Record<string, unknown> {
+  const { contact, ...rest } = program;
+  return withoutUndefined({
+    ...rest,
+    id: undefined,
+    ageBands: [...rest.ageBands],
+    requiredDocs: rest.requiredDocs === null ? null : [...rest.requiredDocs],
+    contact: contact === null ? null : withoutUndefined({ ...contact }),
+  });
+}
+
+/** Firestore から読んだ値を検証して Program にする */
+export function decodeProgram(id: string, data: unknown): DecodeResult<Program> {
+  const parsed = programSchema.safeParse(
+    data !== null && typeof data === "object" ? { ...data, id } : data,
+  );
+  return parsed.success
+    ? { ok: true, value: parsed.data }
+    : { ok: false, errors: issuesToErrors(parsed.error) };
+}
+
+// ---- 医療費 users/{uid}/expenses/{expenseId}（Requirement 6.1） ----
+
+const expenseSchema = z.object({
+  id: docId,
+  date: isoDate,
+  facility: text.refine((s) => charCount(s) <= FACILITY_MAX, "長すぎます"),
+  amountYen: z.number().int().min(1).max(AMOUNT_MAX),
+  subjectId: text,
+  createdAt: isoDateTime,
+  updatedAt: isoDateTime,
+});
+
+/** Firestore に書く形にする（id はドキュメント ID なので本文に入れない） */
+export function encodeExpenseRecord(record: ExpenseRecord): Record<string, unknown> {
+  return withoutUndefined({ ...record, id: undefined });
+}
+
+/** Firestore から読んだ値を検証して ExpenseRecord にする */
+export function decodeExpenseRecord(id: string, data: unknown): DecodeResult<ExpenseRecord> {
+  const parsed = expenseSchema.safeParse(
+    data !== null && typeof data === "object" ? { ...data, id } : data,
+  );
   return parsed.success
     ? { ok: true, value: parsed.data }
     : { ok: false, errors: issuesToErrors(parsed.error) };
