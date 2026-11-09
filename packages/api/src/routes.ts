@@ -19,6 +19,7 @@ export type OwnerRoute = {
 
 export const OWNER_ROUTES: readonly OwnerRoute[] = [
   // エンドポイントの実装（タスク 12 以降）で追加する
+  { method: "GET", path: "/users/:uid/chats", category: "chats" },
 ];
 
 export function routeKey(route: Pick<OwnerRoute, "method" | "path">): string {

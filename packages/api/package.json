@@ -7,6 +7,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@google/genai": "2.30.0",
     "@hachioji-gov/shared": "*",
     "@hono/node-server": "2.1.5",
     "firebase-admin": "14.5.0",

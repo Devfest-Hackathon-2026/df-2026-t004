@@ -7,6 +7,8 @@ import type { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   createApi,
+  FirestoreChatStore,
+  mountChat,
   OWNER_ROUTES,
   routeKey,
   type AppEnv,
@@ -14,6 +16,7 @@ import {
   type HttpMethod,
 } from "../src/index.js";
 import { CANARY_NOTE, CANARY_QUESTION } from "./support/canaries.js";
+import { chatDeps } from "./support/chat-fakes.js";
 import {
   CATEGORY_STORES,
   DUMMY_METHODS,
@@ -43,6 +46,12 @@ type RouteRow = {
 // 実際のエンドポイントを追加するたびに、ここへ1行足す。
 const ROUTE_TABLE: RouteRow[] = [
   // 例: { method: "GET", path: "/users/:uid/expenses", category: "expenses", docPath: (u) => `users/${u}/expenses/e1` },
+  {
+    method: "GET",
+    path: "/users/:uid/chats",
+    category: "chats",
+    docPath: (u) => `users/${u}/chats/c1`,
+  },
 ];
 
 // エンドポイントの実装前は、ダミーのルートで同じ検査が動くことを確認する
@@ -104,6 +113,8 @@ beforeAll(() => {
   });
   app = api.app;
   mountDummyRoutes(app, adminDb(), api.guards.owner);
+  // 実際のルート（Vertex AI は偽物、履歴は Firestore）
+  mountChat(api, { ...chatDeps().deps, store: new FirestoreChatStore(adminDb(), "v1") });
 });
 
 beforeEach(async () => {

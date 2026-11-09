@@ -376,24 +376,24 @@
     - レート制限の 429、ログに質問文やメールが出ないこと（タスク 2.7 のスキャンを API のテストにも適用）
     - _Requirements: 1.10, 15.3_
 
-- [ ] 17. 出典つき RAG チャットを作る
+- [x] 17. 出典つき RAG チャットを作る
   - ブランチ: `feat/rag-chat` ／ type: `feat` ／ PR タイトル例: `feat(api): add grounded chat with citation checks`
   - 実環境での確認は UW-GC-7、UW-GC-9 の後
   - _Requirements: 4.7, 5.1〜5.14, 9.9, 9.13, 10.1〜10.3, 12.1〜12.3, 12.7, 13.10, 13.12_
-  - [ ] 17.1 Firestore の `VectorStore.search` を実装する
+  - [x] 17.1 Firestore の `VectorStore.search` を実装する
     - `planSearchQueries` のクエリを並列に `findNearest`（`DOT_PRODUCT`、`minSimilarity`）で実行し、`mergeResults` で最大5件にする。検索に使う版は `config/embedding` の `searchVersion`
     - _Requirements: 4.7, 5.1, 5.14_
-  - [ ] 17.2 Vertex AI の `Llm` 実装を作る
+  - [x] 17.2 Vertex AI の `Llm` 実装を作る
     - `streamAnswer`（最大出力トークン）、`judgeClaims`（JSON スキーマ）、`classifyIntent`。モデル名は設定から読み、リージョン指定のエンドポイントを使う。プロンプトに入る世帯の属性は `buildLlmContext` の出力だけにする
     - _Requirements: 9.9, 10.1, 13.6, 13.10_
-  - [ ] 17.3 `POST /chat`（SSE）を作る
+  - [x] 17.3 `POST /chat`（SSE）を作る
     - 受付直後に `status` を送る。文字数検証、運営スイッチ、日次上限、意図判定（診断・治療の判断は固定文で拒否）、`maskPii`、検索（0件なら LLM を呼ばず窓口を案内）、生成、引用検証、根拠確認、`nextChatAction` による `verified` / `reset` / `fallback`
     - チャット履歴に保存するのは確定した回答だけ。次の質問候補（最大3件）と、制度の提案（`proposal`）を返す。30秒以内に応答が始まらない場合はエラーにする
     - _Requirements: 5.1〜5.13, 9.13, 10.1〜10.3, 12.1, 12.3, 12.7, 13.12_
-  - [ ] 17.4 チャットの所有者検査とログの検査を追加する（必須）
+  - [x] 17.4 チャットの所有者検査とログの検査を追加する（必須）
     - チャット履歴の他人アクセスの拒否を統合テストの表に追加する。チャットのリクエスト中に、質問文がログに出ないことを検査する
     - _Requirements: 9.7, 15.2, 15.3_
-  - [ ]* 17.5 チャットのユニットテストを書く
+  - [x]* 17.5 チャットのユニットテストを書く
     - 検索0件で LLM を呼ばないこと、診断依頼の拒否、無効な引用での再生成と fallback、上限到達時のメッセージ、ストリームの中断
     - _Requirements: 5.3, 5.4, 5.8, 5.12, 12.7, 13.12_
 
