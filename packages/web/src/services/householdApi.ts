@@ -12,7 +12,7 @@ import {
   type SensitiveData,
   type StoredChild,
 } from "@hachioji-gov/shared";
-import { API_BASE } from "../lib/api";
+import { API_BASE, readFieldErrors } from "../lib/api";
 
 export type Household = {
   readonly postalCode: string;
@@ -111,8 +111,7 @@ export function createHttpHouseholdApi(idToken: () => Promise<string | null>): H
     },
     async saveHousehold(input) {
       const res = await call("/household", { method: "PUT", body: JSON.stringify(input) });
-      if (res.status === 400)
-        return { ok: false, errors: ((await res.json()) as { errors: FieldError[] }).errors };
+      if (res.status === 400) return { ok: false, errors: await readFieldErrors(res) };
       if (!res.ok) throw new Error(`PUT /household ${res.status}`);
       return { ok: true, household: (await res.json()) as Household };
     },
