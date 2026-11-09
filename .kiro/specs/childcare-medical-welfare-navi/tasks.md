@@ -397,14 +397,14 @@
     - 検索0件で LLM を呼ばないこと、診断依頼の拒否、無効な引用での再生成と fallback、上限到達時のメッセージ、ストリームの中断
     - _Requirements: 5.3, 5.4, 5.8, 5.12, 12.7, 13.12_
 
-- [ ] 18. 評価ハーネスを作る（`packages/eval`）
+- [x] 18. 評価ハーネスを作る（`packages/eval`）
   - ブランチ: `feat/eval-harness` ／ type: `feat` ／ PR タイトル例: `feat(eval): add retrieval and answer evaluation`
   - 評価セットの内容の確認は UW-GC-18
   - _Requirements: 12.8, 14.1〜14.8_
   - [x] 18.1 評価セットのスキーマと初版を作る
     - 20問以上（答えのない質問3問以上）。各質問に期待する出典URL、含まれるべき事実、カテゴリ。`validateEvalSet` で検証する。初版は AI が下書きし、内容の確認は運営者が行う
     - _Requirements: 14.1, 14.2_
-  - [ ] 18.2 `eval retrieval` と `eval answer` を作る
+  - [x] 18.2 `eval retrieval` と `eval answer` を作る
     - 検索の再現率@5、根拠範囲内率、引用の有効率を別々に計算し、実行日時、評価セットの版、モデル名、埋め込みの版とともに保存する
     - _Requirements: 14.3〜14.7_
   - [x] 18.3 性能の計測コマンドを作る

@@ -1,18 +1,29 @@
 // 評価ハーネスのコマンド（Requirement 12.8, 14.1〜14.8）
 //
 //   npm run eval -- validate
+//   GOOGLE_CLOUD_PROJECT=... npm run eval -- retrieval
+//   GOOGLE_CLOUD_PROJECT=... npm run eval -- answer
 //   EVAL_ID_TOKEN=... npm run eval -- perf --url https://<api>/chat --mode warm
 //   EVAL_ID_TOKEN=... npm run eval -- perf --url https://<api>/chat --mode cold --service api
 //
 // 評価セットは eval/evalset.v1.json、結果は eval/results/{runId}.json に保存する（Firestore には保存しない）。
-// eval retrieval / eval answer は、本番の検索・生成のパイプライン（T17）ができてから接続する。
+// retrieval と answer は本番の Firestore と Vertex AI を、運営者の資格情報（ADC）で使う。
 
 import { execFile } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { parseArgs } from "node:util";
-import { encodeEvalResult, validateEvalSet, type EvalResult } from "@hachioji-gov/shared";
-import { runIdOf, runPerf } from "./runner.js";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { FirestoreChatStore, FirestoreChatVectorStore, VertexChat } from "@hachioji-gov/api";
+import {
+  encodeEvalResult,
+  loadConfig,
+  validateEvalSet,
+  type EvalResult,
+} from "@hachioji-gov/shared";
+import { PipelineAnswerRunner, PipelineRetriever } from "./pipeline.js";
+import { runAnswerEval, runIdOf, runPerf, runRetrievalEval } from "./runner.js";
 import { HttpChatClient } from "./sse.js";
 
 const EVAL_SET_PATH = "eval/evalset.v1.json";
@@ -52,6 +63,57 @@ async function save(result: EvalResult): Promise<string> {
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- runId は日時から作った文字列
   await writeFile(path, encodeEvalResult(result), "utf8");
   return path;
+}
+
+/** 本番と同じ設定で、検索と生成の部品を作る */
+async function pipeline() {
+  const loaded = loadConfig(
+    JSON.parse(await readFile("config/app.config.json", "utf8")) as unknown,
+  );
+  if (!loaded.ok) {
+    for (const e of loaded.errors) console.error(`${e.key}: ${e.message}`);
+    throw new Error("config/app.config.json が不正です");
+  }
+  const project = process.env["GOOGLE_CLOUD_PROJECT"];
+  if (project === undefined || project === "") {
+    throw new Error("環境変数 GOOGLE_CLOUD_PROJECT が必要です");
+  }
+  const { config } = loaded;
+  const db = getFirestore(initializeApp());
+  const vertex = new VertexChat({
+    project,
+    location: config.ai.location,
+    models: {
+      generation: config.ai.generationModel,
+      judge: config.ai.judgeModel,
+      intent: config.ai.intentModel,
+      embedding: config.embedding.model,
+    },
+    dimensions: config.embedding.dimensions,
+    maxOutputTokens: config.ai.maxOutputTokens,
+  });
+  const search = {
+    embedder: vertex,
+    vectors: new FirestoreChatVectorStore(db),
+    store: new FirestoreChatStore(db, config.embedding.version),
+    settings: {
+      minSimilarity: config.search.minSimilarity,
+      fieldPrefix: config.embedding.fieldPrefix,
+    },
+  };
+  return {
+    search,
+    answer: {
+      ...search,
+      llm: vertex,
+      now: () => new Date(),
+      settings: {
+        ...search.settings,
+        limits: config.limits,
+        firstTokenTimeoutSec: config.chat.firstTokenTimeoutSec,
+      },
+    },
+  };
 }
 
 /** Cloud Run に新しいリビジョンを作らせ、起動済みのインスタンスを捨てる */
@@ -132,11 +194,24 @@ async function main(argv: string[]): Promise<number> {
   }
 
   if (command === "retrieval" || command === "answer") {
-    console.error(`eval ${command} は、検索・生成のパイプライン（T17）ができてから接続します`);
-    return 1;
+    const set = await loadSet();
+    const p = await pipeline();
+    const ranAt = new Date();
+    const base = await models();
+    // 埋め込みの版は、実際に検索に使った版（config/embedding の searchVersion）を記録する
+    const version = await p.search.store.searchVersion();
+    const meta = { ranAt, models: { ...base, embedding: { ...base.embedding, version } } };
+    const result =
+      command === "retrieval"
+        ? await runRetrievalEval(set, new PipelineRetriever(p.search), meta)
+        : await runAnswerEval(set, new PipelineAnswerRunner(p.answer), meta);
+    const path = await save(result);
+    console.log(JSON.stringify(result.metrics, null, 2));
+    console.log(`保存しました: ${path}`);
+    return 0;
   }
 
-  console.error("使い方: npm run eval -- <validate|perf> [オプション]");
+  console.error("使い方: npm run eval -- <validate|retrieval|answer|perf> [オプション]");
   return 1;
 }
 

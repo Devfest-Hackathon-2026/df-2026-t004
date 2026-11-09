@@ -22,6 +22,7 @@ import {
 } from "@hachioji-gov/shared";
 import { admitQuestion, type SwitchReader, type UsageStore } from "../operations.js";
 import type {
+  AnswerInput,
   ChatLlm,
   ChatSource,
   ChatStore,
@@ -80,7 +81,64 @@ export type ChatDeps = {
     fieldPrefix: string;
     firstTokenTimeoutSec: number;
   };
+  // 生成のたびに、検証の結果を受け取る（評価ハーネスが使う）
+  observe?: (attempt: ChatAttempt) => void;
 };
+
+export type ChatAttempt = {
+  text: string;
+  // 回答に渡したチャンクの数（引用番号の有効範囲 1〜n）
+  sourcesCount: number;
+  citationsValid: boolean;
+  // 主張ごとの根拠判定。引用が無効なときは判定しないので空
+  verdicts: ClaimVerdict[];
+};
+
+export type SearchRequest = {
+  // PII を伏せた質問
+  question: string;
+  household: AnswerInput["household"];
+  category?: SourceCategory | null;
+  programId?: string | null;
+};
+
+export type SearchDeps = {
+  embedder: QueryEmbedder;
+  vectors: ChatVectorStore;
+  store: Pick<ChatStore, "searchVersion">;
+  settings: Pick<ChatDeps["settings"], "minSimilarity" | "fieldPrefix">;
+};
+
+/** 国・都・世帯の自治体（または制度）で絞り、設定の版の埋め込みで上位を検索する */
+export async function searchChunks(
+  deps: SearchDeps,
+  req: SearchRequest,
+): Promise<RetrievedChunk[]> {
+  const queries = planSearchQueries(
+    req.programId !== undefined && req.programId !== null
+      ? { programId: req.programId }
+      : {
+          municipalityCodes: [
+            NATIONAL_CODE,
+            TOKYO_CODE,
+            ...(req.household.municipalityCode === null ? [] : [req.household.municipalityCode]),
+          ],
+          ageBands: req.household.ageBands.length === 0 ? null : req.household.ageBands,
+          category: req.category ?? null,
+        },
+  );
+  const [version, embedding] = await Promise.all([
+    deps.store.searchVersion(),
+    deps.embedder.embedQuery(req.question),
+  ]);
+  return deps.vectors.search({
+    queries,
+    embeddingField: `${deps.settings.fieldPrefix}${version}`,
+    embedding,
+    minSimilarity: deps.settings.minSimilarity,
+    limit: SEARCH_TOP_K,
+  });
+}
 
 export type ChatOutcome =
   | "rejected"
@@ -230,29 +288,11 @@ export async function runChat(
     return "medical_judgment";
   }
 
-  const queries = planSearchQueries(
-    req.programId !== undefined && req.programId !== null
-      ? { programId: req.programId }
-      : {
-          municipalityCodes: [
-            NATIONAL_CODE,
-            TOKYO_CODE,
-            ...(household.municipalityCode === null ? [] : [household.municipalityCode]),
-          ],
-          ageBands: household.ageBands.length === 0 ? null : household.ageBands,
-          category: req.category ?? null,
-        },
-  );
-  const [version, embedding] = await Promise.all([
-    deps.store.searchVersion(),
-    deps.embedder.embedQuery(question),
-  ]);
-  const chunks = await deps.vectors.search({
-    queries,
-    embeddingField: `${deps.settings.fieldPrefix}${version}`,
-    embedding,
-    minSimilarity: deps.settings.minSimilarity,
-    limit: SEARCH_TOP_K,
+  const chunks = await searchChunks(deps, {
+    question,
+    household,
+    category: req.category ?? null,
+    programId: req.programId ?? null,
   });
   if (chunks.length === 0) {
     // 資料が無ければ LLM を呼ばない
@@ -296,7 +336,9 @@ export async function runChat(
 
     const citationsValid = validateCitations(text, chunks.length).length === 0;
     // 引用が無効なら根拠の判定は省く（どのみち不合格）
-    const grounding = aggregateGrounding(citationsValid ? await judge(deps.llm, text, chunks) : []);
+    const verdicts = citationsValid ? await judge(deps.llm, text, chunks) : [];
+    deps.observe?.({ text, sourcesCount: chunks.length, citationsValid, verdicts });
+    const grounding = aggregateGrounding(verdicts);
     const action = nextChatAction({
       citationsValid,
       groundingPassed: grounding.passed,
