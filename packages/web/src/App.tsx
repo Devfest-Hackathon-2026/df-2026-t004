@@ -6,9 +6,10 @@ import { PRIVACY, TERMS } from "./legal/content";
 import { routeFor, type SessionState } from "./lib/routing";
 import { showsTabBar } from "./lib/tabs";
 import { Auth } from "./screens/Auth";
+import { Chat } from "./screens/Chat";
 import { Home, Search } from "./screens/Dashboard";
 import { LegalPage } from "./screens/Legal";
-import { MyHomePlaceholder, Placeholder } from "./screens/Placeholder";
+import { MyHomePlaceholder } from "./screens/Placeholder";
 import { OnbChildren, OnbConsent, OnbPostal } from "./screens/Onboarding";
 import { ProgramDetail } from "./screens/ProgramDetail";
 import { useSession } from "./state/session";
@@ -55,7 +56,7 @@ export default function App() {
                   <Route path="/onboarding/consent" element={<OnbConsent />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/search" element={<Search />} />
-                  <Route path="/chat" element={<Placeholder title="AI相談" task="T24（#25）" />} />
+                  <Route path="/chat" element={<Chat />} />
                   <Route path="/my" element={<MyHomePlaceholder />} />
                   <Route path="/programs/:id" element={<ProgramDetail />} />
                   <Route path="/terms" element={<LegalPage doc={TERMS} />} />
