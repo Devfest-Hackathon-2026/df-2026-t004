@@ -1,0 +1,401 @@
+{
+  "version": "2026-11-evalset-v1",
+  "questions": [
+    {
+      "id": "q001",
+      "question": "妊娠したら八王子市の妊婦のための支援給付はいくらもらえますか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": ["https://kosodate.city.hachioji.tokyo.jp/nenrei/ninshin_shussan/3400.html"],
+        "requiredFacts": ["5万円相当", "胎児の数×5万円相当"]
+      }
+    },
+    {
+      "id": "q002",
+      "question": "妊娠がわかったら、まず何の手続きをすればいいですか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/akachannideaumade/ninshinshitara/961.html"
+        ],
+        "requiredFacts": ["妊娠の届出", "母子手帳の交付", "妊婦面談"]
+      }
+    },
+    {
+      "id": "q003",
+      "question": "妊婦健診の費用は何回分助成されますか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/akachannideaumade/mamanokenkokanri/970.html"
+        ],
+        "requiredFacts": ["14回"]
+      }
+    },
+    {
+      "id": "q004",
+      "question": "初めて産婦人科を受診したときの費用を助成してもらえますか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/akachannideaumade/sanzensangonoshien/2956.html"
+        ],
+        "requiredFacts": ["上限10,000円", "住民税非課税世帯"]
+      }
+    },
+    {
+      "id": "q005",
+      "question": "産後ケアの宿泊型を使うと自己負担はいくらですか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/akachannideaumade/sanzensangonoshien/985.html"
+        ],
+        "requiredFacts": ["1泊2日 6,000円"]
+      }
+    },
+    {
+      "id": "q006",
+      "question": "産後ケアは出産後いつまで利用できますか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/akachannideaumade/sanzensangonoshien/985.html"
+        ],
+        "requiredFacts": ["産後1年以内の母子"]
+      }
+    },
+    {
+      "id": "q007",
+      "question": "2歳の子の児童手当は月いくらですか",
+      "category": "childcare",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/1_2sai/sodan_support/1178.html"
+        ],
+        "requiredFacts": ["3歳未満", "15,000円"]
+      }
+    },
+    {
+      "id": "q008",
+      "question": "児童手当は子どもが何歳になるまでもらえますか",
+      "category": "childcare",
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/1_2sai/sodan_support/1178.html"
+        ],
+        "requiredFacts": ["18歳になって最初に迎える3月31日まで"]
+      }
+    },
+    {
+      "id": "q009",
+      "question": "マル乳医療証は何歳まで使えますか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_3_5"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/1_2sai/sodan_support/1180.html"
+        ],
+        "requiredFacts": ["6歳になって最初に迎える3月31日まで"]
+      }
+    },
+    {
+      "id": "q010",
+      "question": "子どもが入院したときの食事代もマル乳で助成されますか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/1_2sai/sodan_support/1180.html"
+        ],
+        "requiredFacts": ["入院時の食事代は助成対象外"]
+      }
+    },
+    {
+      "id": "q011",
+      "question": "子どもの定期の予防接種にお金はかかりますか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.city.hachioji.tokyo.jp/kurashi/hoken/007/yobosesshu/koyobosesshu/p002668.html"
+        ],
+        "requiredFacts": ["対象期間内であれば定期接種は無料"]
+      }
+    },
+    {
+      "id": "q012",
+      "question": "保育園の入園申込はオンラインでできますか",
+      "category": "childcare",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/hoikuen_yochien_ninteikodomoen/nyuennotetsuzuki/890.html"
+        ],
+        "requiredFacts": ["入園（転園）申込のオンライン申請が可能"]
+      }
+    },
+    {
+      "id": "q013",
+      "question": "東京都の018サポートでは子ども1人あたりいくらもらえますか",
+      "category": "childcare",
+      "household": {
+        "ageBands": ["age_6_11"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": ["https://www.fukushi.metro.tokyo.lg.jp/kodomo/kosodate/018"],
+        "requiredFacts": ["月額5,000円"]
+      }
+    },
+    {
+      "id": "q014",
+      "question": "018サポートに所得制限はありますか",
+      "category": "childcare",
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": ["https://www.fukushi.metro.tokyo.lg.jp/kodomo/kosodate/018"],
+        "requiredFacts": ["所得制限はありません"]
+      }
+    },
+    {
+      "id": "q015",
+      "question": "東京都の保育料の第一子無償化はいつから始まりましたか",
+      "category": "childcare",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": ["https://www.fukushi.metro.tokyo.lg.jp/kodomo/hoiku/mushouka"],
+        "requiredFacts": ["令和７年９月１日から"]
+      }
+    },
+    {
+      "id": "q016",
+      "question": "夜に子どもが熱を出して、受診すべきか電話で相談したいです",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.fukushi.metro.tokyo.lg.jp/kodomo/sodan/k_soudan",
+          "https://www.tfd.metro.tokyo.lg.jp/lfe/kyuu_adv/soudan-center.html"
+        ],
+        "requiredFacts": ["8000"]
+      }
+    },
+    {
+      "id": "q017",
+      "question": "救急車を呼ぶべきか迷ったときの相談先はどこですか",
+      "category": "medical",
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.tfd.metro.tokyo.lg.jp/lfe/kyuu_adv/soudan-center.html",
+          "https://www.fukushi.metro.tokyo.lg.jp/kodomo/sodan/k_soudan"
+        ],
+        "requiredFacts": ["7119"]
+      }
+    },
+    {
+      "id": "q018",
+      "question": "出産育児一時金はいくらもらえますか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html"
+        ],
+        "requiredFacts": ["原則50万円"]
+      }
+    },
+    {
+      "id": "q019",
+      "question": "出産育児一時金の申請期限はいつまでですか",
+      "category": "pregnancy",
+      "household": {
+        "ageBands": ["pregnancy"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html"
+        ],
+        "requiredFacts": ["出産日の翌日から2年以内"]
+      }
+    },
+    {
+      "id": "q020",
+      "question": "4歳の子が幼稚園に行っていないのですが、歯科健診は受けられますか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_3_5"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/3sai_shugakumae/kenshin_kenkokanri/1167.html"
+        ],
+        "requiredFacts": ["予約制の歯科健診"]
+      }
+    },
+    {
+      "id": "q021",
+      "question": "幼稚園の保育料の無償化には上限がありますか",
+      "category": "education",
+      "household": {
+        "ageBands": ["age_3_5"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/scene/hoikuen_yochien_ninteikodomoen/yochiennojoho/1110.html",
+          "https://www.cfa.go.jp/policies/kokoseido/mushouka"
+        ],
+        "requiredFacts": ["月額上限25,700円"]
+      }
+    },
+    {
+      "id": "q022",
+      "question": "0歳から2歳の保育料も無料になりますか",
+      "category": "childcare",
+      "household": {
+        "ageBands": ["age_0_2"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://www.cfa.go.jp/policies/kokoseido/mushouka",
+          "https://www.fukushi.metro.tokyo.lg.jp/kodomo/hoiku/mushouka"
+        ],
+        "requiredFacts": ["住民税非課税世帯"]
+      }
+    },
+    {
+      "id": "q023",
+      "question": "小学生の医療費の助成はありますか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_6_11"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "answerable",
+        "sourceUrls": [
+          "https://kosodate.city.hachioji.tokyo.jp/nenrei/sho_chugakusei/sodan_support/1085.html"
+        ],
+        "requiredFacts": ["マル子医療証"]
+      }
+    },
+    {
+      "id": "n001",
+      "question": "八王子市の市営住宅の家賃はいくらですか",
+      "category": "welfare",
+      "expected": {
+        "kind": "no_answer",
+        "expectedBehavior": "fallback_with_contact"
+      }
+    },
+    {
+      "id": "n002",
+      "question": "子どもが熱を出しました。どの薬を飲ませればいいですか",
+      "category": "medical",
+      "household": {
+        "ageBands": ["age_3_5"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "no_answer",
+        "expectedBehavior": "fallback_with_contact"
+      }
+    },
+    {
+      "id": "n003",
+      "question": "子どもの習い事の月謝を補助してもらえる制度はありますか",
+      "category": "education",
+      "household": {
+        "ageBands": ["age_6_11"],
+        "municipalityCode": "13201"
+      },
+      "expected": {
+        "kind": "no_answer",
+        "expectedBehavior": "fallback_with_contact"
+      }
+    },
+    {
+      "id": "n004",
+      "question": "犬を飼い始めたときの登録の手続きを教えてください",
+      "category": "welfare",
+      "expected": {
+        "kind": "no_answer",
+        "expectedBehavior": "fallback_with_contact"
+      }
+    }
+  ]
+}
