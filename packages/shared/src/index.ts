@@ -9,3 +9,7 @@ export * from "./log-scan.js";
 export * from "./collection.js";
 export * from "./extraction.js";
 export * from "./source-registration.js";
+export * from "./search.js";
+export * from "./citations.js";
+export * from "./question.js";
+export * from "./llm-context.js";

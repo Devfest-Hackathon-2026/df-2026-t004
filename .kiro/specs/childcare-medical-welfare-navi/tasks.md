@@ -192,35 +192,35 @@
     - **Property 40: 情報源登録の検証**
     - **Validates: Requirements 13.4, 13.5**
 
-- [ ] 8. 検索計画と、引用・根拠の検証ロジックを作る
+- [x] 8. 検索計画と、引用・根拠の検証ロジックを作る
   - ブランチ: `feat/shared-rag-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add search planning and citation checks`
   - _Requirements: 4.7, 5.1〜5.3, 5.7, 5.9, 5.11〜5.13, 9.9, 9.13_
-  - [ ] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
+  - [x] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
     - フィルタは等価条件のみ（未確認事項 U-1）。年齢区分ごとの真偽値フィールド `band_*` を使い、クエリは21本以下
     - _Requirements: 4.7, 5.1_
-  - [ ]* 8.2 検索計画のプロパティテストを書く
+  - [x]* 8.2 検索計画のプロパティテストを書く
     - **Property 24: 検索クエリ計画と直接フィルタの等価性**
     - **Property 25: 並列クエリ結果の統合**
     - **Property 41: 埋め込みの正規化**
     - **Validates: Requirements 4.7, 5.1**
-  - [ ] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
+  - [x] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
     - 無効な引用は黙って削除しない。再生成は合計1回まで。失敗時の表示モデルは「根拠を確認できませんでした」、出典一覧、問い合わせ窓口で、回答本文を含めない
     - _Requirements: 5.2, 5.3, 5.11, 5.12, 5.13_
-  - [ ]* 8.4 引用・根拠のプロパティテストを書く
+  - [x]* 8.4 引用・根拠のプロパティテストを書く
     - **Property 26: 引用番号の検証**
     - **Property 27: 再生成は合計1回までで、失敗時は fallback になる**
     - **Property 28: 根拠確認の純粋部分**
     - **Validates: Requirements 5.2, 5.3, 5.11, 5.12, 5.13, 14.4**
-  - [ ] 8.5 `validateQuestion`、`limitSuggestions` を実装する
+  - [x] 8.5 `validateQuestion`、`limitSuggestions` を実装する
     - _Requirements: 5.7, 5.9, 13.10_
-  - [ ]* 8.6 質問文と候補のプロパティテストを書く
+  - [x]* 8.6 質問文と候補のプロパティテストを書く
     - **Property 22: 質問文の長さの検証**
     - **Property 23: 次の質問候補の上限**
     - **Validates: Requirements 5.7, 5.9, 13.10**
-  - [ ] 8.7 `buildLlmContext` と `maskPii` を実装する
+  - [x] 8.7 `buildLlmContext` と `maskPii` を実装する
     - LLM に渡す世帯の属性は自治体と年齢区分だけ。出産予定日と要配慮情報は渡さない。電話番号・メール・郵便番号は固定の置換文字列にする
     - _Requirements: 9.9, 9.13_
-  - [ ] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
+  - [x] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
     - **Property 29: LLM に渡す世帯の属性**
     - **Property 30: 質問文の個人情報マスク**
     - **Validates: Requirements 9.9, 9.13**
