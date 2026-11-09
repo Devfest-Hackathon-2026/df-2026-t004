@@ -95,7 +95,7 @@ describe("chunkSource (Property 13)", () => {
     sourceId: fc.constant("city-jido-teate"),
     sourceUrl: fc.constant("https://kosodate.city.hachioji.tokyo.jp/a.html"),
     fetchedAt: fc.constant("2026-11-09T00:00:00.000Z"),
-    contentHash: fc.hexaString({ minLength: 64, maxLength: 64 }),
+    contentHash: fc.stringMatching(/^[0-9a-f]{64}$/),
     municipalityCode: fc.constantFrom("00000", "13000", "13201"),
     level: fc.constantFrom("national" as const, "tokyo" as const, "city" as const),
     category: fc.constantFrom("childcare", "medical"),

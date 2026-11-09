@@ -54,7 +54,7 @@ describe("isDue (Property 11)", () => {
 });
 
 describe("decideSourceAction (Property 11)", () => {
-  const hash = fc.hexaString({ minLength: 8, maxLength: 64 });
+  const hash = fc.stringMatching(/^[0-9a-f]{8,64}$/);
   const miss = fc.integer({ min: 0, max: 5 });
 
   it("ハッシュが同じなら skip し、見つからない回数を戻す", () => {
