@@ -6,7 +6,16 @@ import { readFile } from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import { createLogger, loadConfig } from "@hachioji-gov/shared";
+import {
+  FirestoreChatStore,
+  FirestoreChatVectorStore,
+  FirestoreHouseholdReader,
+} from "./chat/firestore.js";
+import { mountChat } from "./chat/route.js";
+import { VertexChat } from "./chat/vertex.js";
+import { createSwitchReader, FirestoreOpsConfigStore, FirestoreUsageStore } from "./operations.js";
 import { createApi } from "./server.js";
 
 const logger = createLogger();
@@ -21,15 +30,52 @@ async function main(): Promise<void> {
     process.exitCode = 1;
     return;
   }
-  const auth = getAuth(initializeApp());
-  const { app } = createApi({
-    config: loaded.config,
+  const project = process.env["GOOGLE_CLOUD_PROJECT"];
+  if (project === undefined || project === "") {
+    logger.error("api.project_missing");
+    process.exitCode = 1;
+    return;
+  }
+  const { config } = loaded;
+  const firebase = initializeApp();
+  const auth = getAuth(firebase);
+  const db = getFirestore(firebase);
+  const api = createApi({
+    config,
     verifier: { verifyIdToken: (token) => auth.verifyIdToken(token) },
     logger,
   });
-  app.get("/healthz", (c) => c.json({ ok: true }));
+  const vertex = new VertexChat({
+    project,
+    location: config.ai.location,
+    models: {
+      generation: config.ai.generationModel,
+      judge: config.ai.judgeModel,
+      intent: config.ai.intentModel,
+      embedding: config.embedding.model,
+    },
+    dimensions: config.embedding.dimensions,
+    maxOutputTokens: config.ai.maxOutputTokens,
+  });
+  mountChat(api, {
+    switches: createSwitchReader(new FirestoreOpsConfigStore(db), config.operations),
+    usage: new FirestoreUsageStore(db),
+    household: new FirestoreHouseholdReader(db),
+    embedder: vertex,
+    vectors: new FirestoreChatVectorStore(db),
+    llm: vertex,
+    store: new FirestoreChatStore(db, config.embedding.version),
+    now: () => new Date(),
+    settings: {
+      limits: config.limits,
+      minSimilarity: config.search.minSimilarity,
+      fieldPrefix: config.embedding.fieldPrefix,
+      firstTokenTimeoutSec: config.chat.firstTokenTimeoutSec,
+    },
+  });
+  api.app.get("/healthz", (c) => c.json({ ok: true }));
   const port = Number(process.env["PORT"] ?? "8080");
-  serve({ fetch: app.fetch, port });
+  serve({ fetch: api.app.fetch, port });
   logger.info("api.started");
 }
 

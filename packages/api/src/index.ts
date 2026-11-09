@@ -10,3 +10,8 @@ export * from "./routes.js";
 export * from "./middleware.js";
 export * from "./operations.js";
 export * from "./server.js";
+export * from "./chat/types.js";
+export * from "./chat/pipeline.js";
+export * from "./chat/route.js";
+export * from "./chat/firestore.js";
+export * from "./chat/vertex.js";
