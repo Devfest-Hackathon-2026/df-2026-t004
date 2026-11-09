@@ -30,7 +30,7 @@
     "eslint": "9.14.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-security": "4.2.0",
-    "fast-check": "3.22.0",
+    "fast-check": "4.10.2",
     "firebase": "13.1.0",
     "firebase-tools": "13.24.1",
     "globals": "17.13.0",
