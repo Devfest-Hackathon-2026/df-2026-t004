@@ -6,7 +6,7 @@
 import type { Hono } from "hono";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
-  createApp,
+  createApi,
   OWNER_ROUTES,
   routeKey,
   type AppEnv,
@@ -90,9 +90,20 @@ let owner: TestUser;
 let other: TestUser;
 
 beforeAll(() => {
-  const verifier = emulatorVerifier();
-  app = createApp();
-  mountDummyRoutes(app, adminDb(), verifier);
+  // 実際のミドルウェア（レート制限・ID トークン検証・認可）を通す
+  const api = createApi({
+    config: {
+      rateLimit: {
+        perUserPerMinute: 10_000,
+        perIpPerMinute: 10_000,
+        windowSec: 60,
+        maxEntries: 1000,
+      },
+    },
+    verifier: emulatorVerifier(),
+  });
+  app = api.app;
+  mountDummyRoutes(app, adminDb(), api.guards.owner);
 });
 
 beforeEach(async () => {
