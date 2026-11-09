@@ -22,6 +22,7 @@ import {
   FirestoreHouseholdStore,
   mountHousehold,
 } from "./household.js";
+import { FirestoreProgramStore, FirestoreUserRecords, mountDashboard } from "./dashboard.js";
 import { createApi } from "./server.js";
 
 const logger = createLogger();
@@ -81,8 +82,9 @@ async function main(): Promise<void> {
       firstTokenTimeoutSec: config.chat.firstTokenTimeoutSec,
     },
   });
+  const householdStore = new FirestoreHouseholdStore(db);
   mountHousehold(api, {
-    store: new FirestoreHouseholdStore(db),
+    store: householdStore,
     deleter: new AccountDeleter(db, {
       deleteUser: async (uid) => {
         try {
@@ -98,6 +100,12 @@ async function main(): Promise<void> {
     }),
     // 全国の郵便番号データは未投入。投入までは開発用の小さな表を使う
     postal: SAMPLE_POSTAL_TABLE,
+    now: () => new Date(),
+  });
+  mountDashboard(api, {
+    household: householdStore,
+    programs: new FirestoreProgramStore(db),
+    records: new FirestoreUserRecords(db),
     now: () => new Date(),
   });
   api.app.get("/healthz", (c) => c.json({ ok: true }));
