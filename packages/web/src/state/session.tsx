@@ -12,6 +12,11 @@ import {
 } from "react";
 import { readEnv } from "../lib/env";
 import {
+  createHttpDashboardApi,
+  createMockDashboardApi,
+  type DashboardApi,
+} from "../services/dashboardApi";
+import {
   createFirebaseAuth,
   createMockAuth,
   type AuthService,
@@ -59,6 +64,7 @@ export function draftChildren(d: OnboardingDraft): ChildInput[] {
 type Session = {
   auth: AuthService;
   api: HouseholdApi;
+  dashboard: DashboardApi;
   /** undefined は確認中 */
   user: AuthUser | null | undefined;
   /** undefined は読み込み中、null は未登録（オンボーディングが必要） */
@@ -93,6 +99,13 @@ export function SessionProvider({
         : createMockHouseholdApi()),
     [apiOverride, env, auth],
   );
+  const dashboard = useMemo(
+    () =>
+      env.apiMode === "http"
+        ? createHttpDashboardApi(() => auth.idToken())
+        : createMockDashboardApi(),
+    [env, auth],
+  );
   const [user, setUser] = useState<AuthUser | null | undefined>(undefined);
   const [household, setHousehold] = useState<Household | null | undefined>(undefined);
   const [draft, setDraftState] = useState<OnboardingDraft>(EMPTY_DRAFT);
@@ -120,6 +133,7 @@ export function SessionProvider({
     () => ({
       auth,
       api,
+      dashboard,
       user,
       household,
       setHousehold,
@@ -127,7 +141,7 @@ export function SessionProvider({
       draft,
       setDraft: (f) => setDraftState((d) => f(d)),
     }),
-    [auth, api, user, household, reloadHousehold, draft],
+    [auth, api, dashboard, user, household, reloadHousehold, draft],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
