@@ -687,6 +687,11 @@ export function ExpenseForm() {
           {err("subjectId") && <p className="err">{err("subjectId")}</p>}
         </fieldset>
         <p className="notice gray">領収書の写真の読み取りは、今後対応する予定です</p>
+        {err("form") && (
+          <p role="alert" className="err">
+            {err("form")}
+          </p>
+        )}
         {failure && (
           <p role="alert" className="err">
             {failure}

@@ -196,6 +196,11 @@ export function Chat() {
                     <p className="bold" style={{ fontSize: 14 }}>
                       根拠を確認できませんでした
                     </p>
+                    {t.answer.notice && (
+                      <p className="note" style={{ lineHeight: 1.7 }}>
+                        {t.answer.notice}
+                      </p>
+                    )}
                     {t.answer.sources.length > 0 && (
                       <div className="stack-4 note">
                         <span>関係しそうな資料：</span>
@@ -217,6 +222,7 @@ export function Chat() {
                     style={{ borderColor: "var(--error)" }}
                   >
                     <p className="err">{t.answer.errorMessage}</p>
+                    {t.answer.contact && <p className="note">お問い合わせ：{t.answer.contact}</p>}
                     <button
                       type="button"
                       className="btn strong self-start"

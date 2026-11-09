@@ -72,7 +72,7 @@ const MOCK_ANSWER =
 /**
  * 仮実装。質問の言葉で、次の場合を再現する。
  * - 「保育園」「根拠」: 下書き → reset → 再生成 → fallback（根拠を確認できませんでした）
- * - 「熱」「診断」「症状」: 診断はしない旨の回答
+ * - 「熱」「診断」「症状」: 回答を作らず、医師への相談を案内する（fallback）
  * - 「上限」: 日次上限のエラー（再開時刻つき）
  * - 「中断」: 途中で接続が切れる
  */
@@ -107,20 +107,23 @@ export function createMockChatApi(): ChatApi {
         onEvent({
           type: "error",
           message: "きょうの AI 相談の回数の上限に達しました。",
-          retryAt: "明日 0:00",
+          // API と同じく、日本時間の翌日0時を ISO で返す
+          retryAt: new Date(
+            Date.parse(new Date(Date.now() + 9 * 3_600_000).toISOString().slice(0, 10)) +
+              15 * 3_600_000,
+          ).toISOString(),
+          contact: "[八王子市 子育て支援課（ダミー）] 042-000-0000",
         });
         return;
       }
       if (/熱|診断|症状/.test(q)) {
-        await stream(
-          "体調についての判断はできません。気になる症状があるときは、医師に相談してください。夜間や休日は、八王子市の休日・夜間の診療案内を確認してください。",
-          onEvent,
-          signal,
-        );
-        onEvent({ type: "verified" });
+        // 医療の判断を求める質問は、回答を作らずに医師への相談を案内する（API と同じ）
         onEvent({
-          type: "suggestions",
-          suggestions: ["休日に子どもを診てもらえる場所は？", "医療費の助成はある？"],
+          type: "fallback",
+          message:
+            "体調や治療についての判断はできません。気になる症状があるときは、医師に相談してください。",
+          sources: [],
+          contact: "[八王子市 休日・夜間の診療案内（ダミー）] 042-000-0000",
         });
         return;
       }

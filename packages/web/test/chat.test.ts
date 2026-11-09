@@ -4,6 +4,7 @@ import {
   EMPTY_ANSWER,
   applyChatEvent,
   checkQuestion,
+  formatRetryAt,
   interruptAnswer,
   splitCitations,
   toChatEvent,
@@ -154,4 +155,44 @@ describe("チャットの仮実装", () => {
     expect(fb.map((e) => e.type)).toContain("reset");
     expect(run(fb).status).toBe("fallback");
   }, 20_000);
+});
+
+describe("API の SSE の形（packages/api の ChatEvents）", () => {
+  it("suggestions.items・proposal.programs・verified.text・fallback.message を読む", () => {
+    expect(toChatEvent("suggestions", '{"items":["a","b"]}')).toEqual({
+      type: "suggestions",
+      suggestions: ["a", "b"],
+    });
+    expect(
+      toChatEvent("proposal", '{"programs":[{"programId":"p1","name":"医療費助成"}]}'),
+    ).toEqual({ type: "proposal", programId: "p1", programName: "医療費助成" });
+    expect(toChatEvent("proposal", '{"programs":[]}')).toBeNull();
+    expect(toChatEvent("status", '{"state":"accepted"}')).toEqual({
+      type: "status",
+      status: "accepted",
+    });
+    const a = run([
+      { type: "delta", text: "下書き" },
+      toChatEvent("verified", '{"text":"確定した本文[1]","chatId":"c1"}')!,
+    ]);
+    expect(a).toMatchObject({ status: "verified", text: "確定した本文[1]" });
+    const f = run([
+      toChatEvent(
+        "fallback",
+        '{"reason":"medical_judgment","message":"医師に相談","sources":[],"contact":"窓口"}',
+      )!,
+    ]);
+    expect(f).toMatchObject({ status: "fallback", notice: "医師に相談", contact: "窓口" });
+  });
+
+  it("上限の再開時刻（ISO）を日本時間で表示し、窓口も残す", () => {
+    const e = toChatEvent(
+      "error",
+      '{"reason":"quota_user","message":"上限です","retryAt":"2026-11-10T15:00:00.000Z","contact":"窓口"}',
+    )!;
+    const a = run([e]);
+    expect(a.errorMessage).toBe("上限です（11/11 0:00 から再開します）");
+    expect(a.contact).toBe("窓口");
+    expect(formatRetryAt("明日 0:00")).toBe("明日 0:00");
+  });
 });

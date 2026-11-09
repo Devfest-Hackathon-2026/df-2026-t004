@@ -14,7 +14,7 @@ import {
   type FieldError,
   type MatchHousehold,
 } from "@hachioji-gov/shared";
-import { API_BASE } from "../lib/api";
+import { API_BASE, readFieldErrors } from "../lib/api";
 import { MOCK_PROGRAMS } from "../mock/programs";
 
 export type ExpenseOverview = {
@@ -126,8 +126,17 @@ export function createHttpAccountApi(idToken: () => Promise<string | null>): Acc
         method: id ? "PUT" : "POST",
         body: JSON.stringify(input),
       });
-      if (res.status === 400)
-        return { ok: false, errors: ((await res.json()) as { errors: FieldError[] }).errors };
+      if (res.status === 400) return { ok: false, errors: await readFieldErrors(res) };
+      if (res.status === 409)
+        return {
+          ok: false,
+          errors: [
+            {
+              field: "form",
+              message: "記録できる件数の上限に達しました。古い記録を削除してください。",
+            },
+          ],
+        };
       await ok(res, "save expense");
       return { ok: true, record: (await res.json()) as ExpenseRecord };
     },
