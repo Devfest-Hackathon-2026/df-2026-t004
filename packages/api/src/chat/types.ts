@@ -80,13 +80,17 @@ export interface ChatStore {
   programNames(ids: readonly string[]): Promise<Map<string, string>>;
   /** 検索に使う埋め込みの版（config/embedding の searchVersion） */
   searchVersion(): Promise<string>;
-  /** 確定した回答だけを保存する。保存したチャットの ID を返す */
-  saveChat(uid: string, record: ChatRecord): Promise<string>;
+  /**
+   * 確定した回答だけを保存する。保存したチャットの ID を返す。
+   * アカウントの削除中・削除済みなら保存せず null を返す
+   */
+  saveChat(uid: string, record: ChatRecord): Promise<string | null>;
   listChats(uid: string, limit: number): Promise<(ChatRecord & { id: string })[]>;
 }
 
 export type ChatErrorReason =
   | "invalid_question"
+  | "account_deleting"
   | "ops_stopped"
   | "quota_user"
   | "quota_global"

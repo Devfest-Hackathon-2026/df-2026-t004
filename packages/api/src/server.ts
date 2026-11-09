@@ -9,13 +9,17 @@ import {
   authorizeOwner,
   rateLimitByIp,
   rateLimitByUser,
+  rejectDeletingAccount,
   rejectMultipart,
+  type AccountStatus,
   type Now,
 } from "./middleware.js";
 
 export type ApiDeps = {
   config: Pick<AppConfig, "rateLimit">;
   verifier: IdTokenVerifier;
+  // アカウント削除の途中のユーザーを拒否する（省略時は確かめない）
+  accountStatus?: AccountStatus;
   logger?: Logger;
   now?: Now;
 };
@@ -54,6 +58,10 @@ export function createApi(deps: ApiDeps): Api {
   app.use("*", rateLimitByIp(byIp, now));
   app.use("*", rejectMultipart);
 
-  const signedIn = [authenticate(deps.verifier), rateLimitByUser(byUser, now)];
+  const signedIn = [
+    authenticate(deps.verifier),
+    ...(deps.accountStatus === undefined ? [] : [rejectDeletingAccount(deps.accountStatus)]),
+    rateLimitByUser(byUser, now),
+  ];
   return { app, guards: { signedIn, owner: [...signedIn, authorizeOwner()] } };
 }
