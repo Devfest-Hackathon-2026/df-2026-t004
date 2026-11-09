@@ -7,6 +7,7 @@
 //
 // 注意: Emulator は複合インデックスを要求せず、実環境の検索エンジンとは別の実装である。
 // ここでの結果は「Emulator での動作」の記録で、実環境での可否は UW-GC-9 で確かめる。
+// そのため、等価条件以外が Emulator で使えても、設計（等価条件のみ・band_X の真偽値）は変えない。
 
 import { planSearchQueries, SOURCE_AGE_BANDS } from "@hachioji-gov/shared";
 import type { SourceAgeBand } from "@hachioji-gov/shared";
@@ -230,6 +231,9 @@ describe("U-1: 等価条件以外の事前フィルタ（Emulator での併用�
           .where("band_age_0_2", "==", true),
       ),
     );
+    // 記録（2026-11、cloud-firestore-emulator v1.22.0）: Emulator では使え、結果も直接フィルタと一致した。
+    // 失敗した場合は Emulator の挙動が変わったので、U-1 の記録を見直す
+    expect(result.status).toBe("supported");
     if (result.status === "supported") {
       expect(result.ids).toEqual(bruteForce((d) => d.searchable && d.ageBands.includes("age_0_2")));
     }
@@ -246,6 +250,9 @@ describe("U-1: 等価条件以外の事前フィルタ（Emulator での併用�
           .where("ageBands", "array-contains", "age_3_5"),
       ),
     );
+    // 記録（2026-11、cloud-firestore-emulator v1.22.0）: Emulator では使え、結果も直接フィルタと一致した。
+    // 失敗した場合は Emulator の挙動が変わったので、U-1 の記録を見直す
+    expect(result.status).toBe("supported");
     if (result.status === "supported") {
       expect(result.ids).toEqual(
         bruteForce(
@@ -267,6 +274,9 @@ describe("U-1: 等価条件以外の事前フィルタ（Emulator での併用�
           .where("ageBands", "array-contains-any", bands),
       ),
     );
+    // 記録（2026-11、cloud-firestore-emulator v1.22.0）: Emulator では使え、結果も直接フィルタと一致した。
+    // 失敗した場合は Emulator の挙動が変わったので、U-1 の記録を見直す
+    expect(result.status).toBe("supported");
     if (result.status === "supported") {
       expect(result.ids).toEqual(
         bruteForce(
@@ -290,6 +300,9 @@ describe("U-1: 等価条件以外の事前フィルタ（Emulator での併用�
           .where("ageBands", "array-contains", "age_6_11"),
       ),
     );
+    // 記録（2026-11、cloud-firestore-emulator v1.22.0）: Emulator では使え、結果も直接フィルタと一致した。
+    // 失敗した場合は Emulator の挙動が変わったので、U-1 の記録を見直す
+    expect(result.status).toBe("supported");
     if (result.status === "supported") {
       expect(result.ids).toEqual(
         bruteForce(
@@ -320,6 +333,9 @@ describe("U-1: 等価条件以外の事前フィルタ（Emulator での併用�
           ),
       ),
     );
+    // 記録（2026-11、cloud-firestore-emulator v1.22.0）: Emulator では使え、結果も直接フィルタと一致した。
+    // 失敗した場合は Emulator の挙動が変わったので、U-1 の記録を見直す
+    expect(result.status).toBe("supported");
     if (result.status === "supported") {
       expect(result.ids).toEqual(
         bruteForce(
