@@ -28,6 +28,21 @@ updates:
       npm-dev:
         dependency-type: development
         update-types: [minor, patch]
+    # メジャー更新を出さない依存（マイナー・パッチ更新とセキュリティ更新は引き続き届く）。
+    # 対応できるようになったら、ここから外して手動で上げる。
+    ignore:
+      # ESLint 10: typescript-eslint 8 が未対応（scopeManager.addGlobals のエラー）。
+      # @eslint/js 10 は ESLint 10 が必要。2つは同時に上げる
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
+      # TypeScript 7（Go 版のコンパイラ）: typescript-eslint が未対応
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # 実行環境の Node.js（.nvmrc）に合わせる。Node を上げるときに一緒に上げる
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
