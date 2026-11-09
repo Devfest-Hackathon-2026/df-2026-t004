@@ -302,30 +302,30 @@
     - `findNearest` と等価条件の事前フィルタの組合せが Emulator で動くかを、統合テストで確認する。`in` や `array-contains` との併用可否も試し、結果を設計書の未確認事項 U-1 の確認記録として PR に書く（設計書は変更しない）。Emulator が対応していない場合は、その旨を記録し、実環境での確認を UW-GC-9 に回す
     - _Requirements: 4.7, 5.1_
 
-- [ ] 13. 公的情報の収集ジョブを作る（`packages/collector`）
+- [x] 13. 公的情報の収集ジョブを作る（`packages/collector`）
   - ブランチ: `feat/collector` ／ type: `feat` ／ PR タイトル例: `feat(collector): collect public sources into verified chunks`
   - 開発とテストは Emulator と差し替え可能な実装（`Fetcher`、`Embedder`、`Llm`、`VectorStore` のインメモリ実装）で行う。実環境での実行は UW-GC-7 の後
   - _Requirements: 3.1〜3.12, 3.15, 13.4, 13.11, 13.13_
-  - [ ] 13.1 外部境界のインターフェースとインメモリ実装を作る
+  - [x] 13.1 外部境界のインターフェースとインメモリ実装を作る
     - `Fetcher`（30秒タイムアウト）、`Embedder`、`Llm.extractProgram`、`VectorStore`、`Clock`、`OpsConfigStore` の型と、テスト用のインメモリ実装
     - _Requirements: 3.1, 3.5_
-  - [ ] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
+  - [x] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
     - 本文は要約せず原文のまま渡す。PDF はページ番号を保持する
     - _Requirements: 3.4, 3.9_
-  - [ ] 13.3 収集の実行ループを作る
+  - [x] 13.3 収集の実行ループを作る
     - 開始時と各取得の直前に運営スイッチを確認する。`isDue` → 取得（再試行最大3回）→ `decideSourceAction` → 置換の順序（`needsReview` と旧チャンクの `searchable=false` → 新チャンクを `searchable=false` で書き込み → 旧チャンクを削除）を守る
     - 1つの情報源の失敗で他を止めない。失敗は `fetchLogs` に出典URL・時刻・原因（個人情報なし）を記録する。`planFetch` の上限と `deferred` の記録
     - 各チャンクに埋め込みのモデル名・次元・版を保存する
     - _Requirements: 3.1〜3.8, 3.11, 3.12, 3.15, 13.11, 13.13_
-  - [ ] 13.4 Vertex AI の実装を作る
+  - [x] 13.4 Vertex AI の実装を作る
     - 埋め込み（`gemini-embedding-001`、出力次元は設定値、L2 正規化）と構造化抽出（JSON スキーマ、欠落は null）。モデル名とリージョンは設定から読む。リージョン指定のエンドポイントを使う
     - _Requirements: 3.3, 3.7, 13.6_
-  - [ ] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
+  - [x] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
     - `upsertChunks`（新チャンクを `searchable=false` で書き込んでから旧チャンクを削除する。バッチ書き込みの上限に合わせて分割する）、`setSearchable`（制度単位でチャンクの `searchable` を更新）、`markExcluded`（情報源単位で検索対象から外す）
     - フィールドは設計書の `chunks` スキーマ（`excerpt`、`emb_{version}`、`embeddingMeta`、`band_*`、`municipalityCode`、`category`、`programId`、`searchable` など）に合わせる
     - Emulator で統合テストを書く: 置換の途中で失敗しても、検索対象（`searchable=true`）に旧版と新版のチャンクが混ざらないこと。再実行しても同じ結果になること（冪等）
     - _Requirements: 3.3, 3.4, 3.6, 3.15, 13.13_
-  - [ ]* 13.6 収集のユニットテストを書く
+  - [x]* 13.6 収集のユニットテストを書く
     - 取得失敗で既存チャンクが変わらないこと、1件の失敗で他が処理されること、404 が2回連続で除外されること、上限到達時の記録、運営スイッチが停止なら取得を始めないこと
     - _Requirements: 3.5, 3.6, 3.8, 3.12, 13.11_
 
