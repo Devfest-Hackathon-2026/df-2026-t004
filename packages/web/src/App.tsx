@@ -7,6 +7,7 @@ import { routeFor, type SessionState } from "./lib/routing";
 import { showsTabBar } from "./lib/tabs";
 import { Deleted, ExpenseForm, Expenses, MyHome } from "./screens/Account";
 import { Auth } from "./screens/Auth";
+import { HouseholdEdit } from "./screens/HouseholdEdit";
 import { Chat } from "./screens/Chat";
 import { Home, Search } from "./screens/Dashboard";
 import { LegalPage } from "./screens/Legal";
@@ -58,6 +59,7 @@ export default function App() {
                   <Route path="/search" element={<Search />} />
                   <Route path="/chat" element={<Chat />} />
                   <Route path="/my" element={<MyHome />} />
+                  <Route path="/my/household" element={<HouseholdEdit />} />
                   <Route path="/my/expenses" element={<Expenses />} />
                   <Route path="/my/expenses/new" element={<ExpenseForm />} />
                   <Route path="/my/expenses/:id" element={<ExpenseForm />} />
