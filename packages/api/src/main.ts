@@ -16,7 +16,12 @@ import {
 import { mountChat } from "./chat/route.js";
 import { VertexChat } from "./chat/vertex.js";
 import { createSwitchReader, FirestoreOpsConfigStore, FirestoreUsageStore } from "./operations.js";
-import { AccountDeleter, FirestoreHouseholdStore, mountHousehold } from "./household.js";
+import {
+  AccountDeleter,
+  FirestoreAccountStatus,
+  FirestoreHouseholdStore,
+  mountHousehold,
+} from "./household.js";
 import { createApi } from "./server.js";
 
 const logger = createLogger();
@@ -43,7 +48,9 @@ async function main(): Promise<void> {
   const db = getFirestore(firebase);
   const api = createApi({
     config,
-    verifier: { verifyIdToken: (token) => auth.verifyIdToken(token) },
+    // 失効も確かめる（削除・無効化したユーザーの古いトークンを通さない）
+    verifier: { verifyIdToken: (token) => auth.verifyIdToken(token, true) },
+    accountStatus: new FirestoreAccountStatus(db),
     logger,
   });
   const vertex = new VertexChat({

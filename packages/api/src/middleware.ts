@@ -66,6 +66,25 @@ export function authenticate(verifier: IdTokenVerifier): MiddlewareHandler<AppEn
   };
 }
 
+/** アカウント削除の進行状態 */
+export interface AccountStatus {
+  isDeleting(uid: string): Promise<boolean>;
+}
+
+/**
+ * アカウント削除の途中なら 409 で拒否する。authenticate の後に置く。
+ * 削除の後にデータが作り直されないようにするため。DELETE /account だけは再試行のために通す。
+ */
+export function rejectDeletingAccount(status: AccountStatus): MiddlewareHandler<AppEnv> {
+  return async (c, next) => {
+    const retry = c.req.method === "DELETE" && c.req.path === "/account";
+    if (!retry && (await status.isDeleting(c.get("uid")))) {
+      return c.json({ error: "account_deleting" }, 409);
+    }
+    await next();
+  };
+}
+
 /** ③ ユーザーごとのレート制限。authenticate の後に置く */
 export function rateLimitByUser(limiter: RateLimiter, now: Now): MiddlewareHandler<AppEnv> {
   return async (c, next) => {

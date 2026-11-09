@@ -26,3 +26,4 @@ export * from "./programs.js";
 export * from "./expense.js";
 export * from "./notifications.js";
 export * from "./deletion.js";
+export * from "./legal.js";

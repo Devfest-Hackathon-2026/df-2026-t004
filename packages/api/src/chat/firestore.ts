@@ -139,8 +139,9 @@ export class FirestoreHouseholdReader implements HouseholdReader {
           ];
         })
       : [];
+    const record: unknown = snap.get("consents.sensitive");
     const consent =
-      snap.get("consents.sensitive") !== undefined && snap.get("sensitiveLocked") !== true;
+      record !== null && typeof record === "object" && snap.get("sensitiveLocked") !== true;
     const dueDate: unknown = sensitive.get("pregnancy.dueDate");
     const { bands } = deriveAgeBands(
       stored,

@@ -16,18 +16,23 @@ import {
   type PostalTable,
   type SensitiveData,
   type StoredChild,
+  LEGAL_VERSION,
+  SENSITIVE_CONSENT_VERSION,
 } from "@hachioji-gov/shared";
 import { FieldValue, Timestamp, type Firestore } from "firebase-admin/firestore";
+import type { AccountStatus } from "./middleware.js";
 import type { Api } from "./server.js";
 
-// 世帯の入力画面で同意したときに記録する版（同意文を変えたら上げる）
-export const SENSITIVE_CONSENT_VERSION = "2026-11";
 // アカウント削除の Firestore 部分の上限（30秒以内に終えるため）
 export const DELETION_TIMEOUT_MS = 25_000;
 // deletionJobs を TTL で消すまでの日数
 export const DELETION_JOB_RETENTION_DAYS = 7;
 
-const VERSION = /^[A-Za-z0-9._-]{1,40}$/;
+// 記録してよい同意の版（サーバーの現在の版と一致するときだけ記録する）
+const CONSENT_VERSIONS = new Map([
+  ["terms", LEGAL_VERSION],
+  ["sensitive", SENSITIVE_CONSENT_VERSION],
+]);
 const CHIP = /^[a-z][a-z0-9_]{0,39}$/;
 const DEFERRED = /^[A-Za-z][A-Za-z0-9_.]{0,39}$/;
 
@@ -296,6 +301,25 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | "timeout">
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
+/**
+ * アカウント削除の途中かどうか。users/{uid}.deleting と deletionJobs/{uid} の状態を見る。
+ * users/{uid} は削除の途中で消えるため、ジョブが running か failed の間も削除中として扱う
+ * （Auth の削除に失敗したあとに、データが作り直されないようにする）。
+ */
+export class FirestoreAccountStatus implements AccountStatus {
+  constructor(private readonly db: Firestore) {}
+
+  async isDeleting(uid: string): Promise<boolean> {
+    if (uid === "" || uid.includes("/")) return false;
+    const [user, job] = await this.db.getAll(
+      this.db.collection("users").doc(uid),
+      this.db.collection("deletionJobs").doc(uid),
+    );
+    const state: unknown = job?.get("state");
+    return user?.get("deleting") === true || state === "running" || state === "failed";
+  }
+}
+
 /** アカウント削除（冪等。何度実行しても同じ最終状態になる） */
 export class AccountDeleter {
   constructor(
@@ -411,7 +435,10 @@ export function mountHousehold(api: Api, deps: HouseholdDeps): void {
     const kind = c.req.param("kind");
     if (kind !== "terms" && kind !== "sensitive") return c.json({ error: "not_found" }, 404);
     const version = str(await jsonBody(c), "version");
-    if (!VERSION.test(version)) return c.json({ error: "invalid_request" }, 400);
+    // 古い文面への同意を記録しないよう、現在の版だけを受け付ける
+    if (version !== CONSENT_VERSIONS.get(kind)) {
+      return c.json({ error: "version_mismatch" }, 400);
+    }
     const uid = c.get("uid");
     // 撤回の削除が終わっていないうちに同意し直すと、古い要配慮情報が読めてしまう
     if (kind === "sensitive" && (await deps.store.isSensitiveLocked(uid))) {

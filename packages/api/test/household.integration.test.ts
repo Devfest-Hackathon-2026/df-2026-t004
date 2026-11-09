@@ -1,10 +1,17 @@
 // 世帯情報・同意・郵便番号・アカウント削除の API（Requirement 2, 8.3〜8.5, 9.1〜9.4, 9.11, 15.2）
 // `npm run test:integration` で Firebase Emulator 上で実行する。
-import { createLogger, SAMPLE_POSTAL_TABLE, scanLogForLeaks } from "@hachioji-gov/shared";
+import {
+  createLogger,
+  LEGAL_VERSION,
+  SAMPLE_POSTAL_TABLE,
+  scanLogForLeaks,
+  SENSITIVE_CONSENT_VERSION,
+} from "@hachioji-gov/shared";
 import { getAuth } from "firebase-admin/auth";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   AccountDeleter,
+  FirestoreAccountStatus,
   createApi,
   FirestoreHouseholdStore,
   mountHousehold,
@@ -50,6 +57,7 @@ function setup(auth: AccountAuth = realAuth) {
       rateLimit: { perUserPerMinute: 1000, perIpPerMinute: 1000, windowSec: 60, maxEntries: 100 },
     },
     verifier: emulatorVerifier(),
+    accountStatus: new FirestoreAccountStatus(adminDb()),
     logger: createLogger({ sink: (line) => lines.push(line) }),
   });
   const store = new FlakyStore(adminDb(), () => NOW);
@@ -202,14 +210,26 @@ describe("世帯情報", () => {
 });
 
 describe("同意", () => {
-  it("利用規約の同意を版と時刻つきで記録する", async () => {
+  it("利用規約の同意を、現在の版のときだけ版と時刻つきで記録する", async () => {
     const t = setup();
-    const res = await t.call("POST", "/consents/terms", owner, { version: "2026-11-01" });
+    const res = await t.call("POST", "/consents/terms", owner, { version: LEGAL_VERSION });
     expect(res.status).toBe(204);
     expect((await doc(`users/${owner.uid}`))?.["consents"]).toEqual({
-      terms: { version: "2026-11-01", acceptedAt: NOW.toISOString() },
+      terms: { version: LEGAL_VERSION, acceptedAt: NOW.toISOString() },
     });
-    expect((await t.call("POST", "/consents/terms", owner, { version: "" })).status).toBe(400);
+    for (const version of ["", "2025-01-old", SENSITIVE_CONSENT_VERSION]) {
+      const old = await t.call("POST", "/consents/terms", other, { version });
+      expect(old.status).toBe(400);
+      expect(await old.json()).toEqual({ error: "version_mismatch" });
+    }
+    expect(await doc(`users/${other.uid}`)).toBeUndefined();
+    expect(
+      (await t.call("POST", "/consents/sensitive", owner, { version: LEGAL_VERSION })).status,
+    ).toBe(400);
+    expect(
+      (await t.call("POST", "/consents/sensitive", owner, { version: SENSITIVE_CONSENT_VERSION }))
+        .status,
+    ).toBe(204);
     expect((await t.call("POST", "/consents/other", owner, { version: "v1" })).status).toBe(404);
   });
 
@@ -269,6 +289,55 @@ describe("郵便番号", () => {
 });
 
 describe("アカウント削除", () => {
+  it.each([
+    [
+      "users/{uid}.deleting",
+      (uid: string) => adminDb().doc(`users/${uid}`).set({ deleting: true }),
+    ],
+    [
+      "削除ジョブが running",
+      (uid: string) => adminDb().doc(`deletionJobs/${uid}`).set({ state: "running" }),
+    ],
+    [
+      "削除ジョブが failed",
+      (uid: string) => adminDb().doc(`deletionJobs/${uid}`).set({ state: "failed" }),
+    ],
+  ])("削除中（%s）は他の API を 409 で拒否し、データを作り直さない", async (_label, mark) => {
+    const t = setup();
+    await mark(owner.uid);
+    const before = await doc(`users/${owner.uid}`);
+    const res = await t.call("PUT", "/household", owner, WITH_CONSENT);
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: "account_deleting" });
+    expect((await t.call("GET", "/household", owner)).status).toBe(409);
+    expect(
+      (await t.call("POST", "/consents/terms", owner, { version: LEGAL_VERSION })).status,
+    ).toBe(409);
+    expect(await doc(`users/${owner.uid}`)).toEqual(before);
+    expect(await doc(`users/${owner.uid}/sensitive/profile`)).toBeUndefined();
+    // 他の人には影響しない
+    expect((await t.call("PUT", "/household", other, WITH_CONSENT)).status).toBe(200);
+    // 削除の再試行だけは通す
+    expect((await t.call("DELETE", "/account", owner)).status).toBe(200);
+  });
+
+  it("Auth のユーザーを削除した後の古いトークンは 401 になり、データを作れない", async () => {
+    const t = setup();
+    await getAuth(adminApp()).deleteUser(owner.uid);
+    const res = await t.call("PUT", "/household", owner, WITH_CONSENT);
+    expect(res.status).toBe(401);
+    expect((await t.call("GET", "/household", owner)).status).toBe(401);
+    expect(await doc(`users/${owner.uid}`)).toBeUndefined();
+  });
+
+  it("トークンを失効させた後も 401 になる", async () => {
+    const t = setup();
+    // 失効の時刻は秒単位で記録されるため、トークンの発行から1秒以上あけて失効させる
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    await getAuth(adminApp()).revokeRefreshTokens(owner.uid);
+    expect((await t.call("GET", "/household", owner)).status).toBe(401);
+  });
+
   async function seed(uid: string) {
     const db = adminDb();
     await Promise.all([
