@@ -166,14 +166,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      # gen-indexes（scripts/gen-indexes.ts）の実装前は成功とする。
-      # 実装後は、再生成した firestore.indexes.json がコミット済みのものと一致することを検査する。
-      - name: Check generated indexes
+      - run: npm ci
+      # config/app.config.json から firebase/firestore.indexes.json を再生成し、
+      # コミット済みのものと一致することを検査する（手書きの変更や再生成のし忘れを検出する）
+      - name: Regenerate indexes
+        run: npm run gen-indexes
+      - name: Check generated indexes match the committed file
         run: |
-          if [ ! -f scripts/gen-indexes.ts ]; then
-            echo "scripts/gen-indexes.ts is not implemented yet; skipping the diff check."
-            exit 0
+          if ! git diff --exit-code -- firebase/firestore.indexes.json; then
+            echo "::error file=firebase/firestore.indexes.json::firestore.indexes.json is out of date. Run 'npm run gen-indexes' and commit the result."
+            exit 1
           fi
-          npm ci
-          npm run gen-indexes
-          git diff --exit-code -- firebase/firestore.indexes.json
