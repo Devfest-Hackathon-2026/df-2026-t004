@@ -34,3 +34,35 @@ export async function fetchCached<T>(
     return { status: "error", httpStatus: res.status };
   }
 }
+
+/**
+ * 400 の応答から入力欄ごとのエラーを取り出す。
+ * 形が違うとき（`{ error: "invalid_request" }` など）は、フォーム全体のエラーにする。
+ */
+export async function readFieldErrors(
+  res: Response,
+): Promise<Array<{ field: string; message: string }>> {
+  try {
+    const body: unknown = await res.json();
+    const errors: unknown =
+      typeof body === "object" && body !== null ? Reflect.get(body, "errors") : undefined;
+    if (Array.isArray(errors) && errors.length > 0) {
+      return errors.flatMap((e: unknown) =>
+        typeof e === "object" &&
+        e !== null &&
+        typeof Reflect.get(e, "field") === "string" &&
+        typeof Reflect.get(e, "message") === "string"
+          ? [
+              {
+                field: Reflect.get(e, "field") as string,
+                message: Reflect.get(e, "message") as string,
+              },
+            ]
+          : [],
+      );
+    }
+  } catch {
+    // 本文が JSON でない
+  }
+  return [{ field: "form", message: "入力内容を確認してください。" }];
+}

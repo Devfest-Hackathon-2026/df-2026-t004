@@ -105,58 +105,58 @@
 
 ### フェーズ1: 共有の純粋ロジック（`packages/shared`）
 
-- [ ] 5. 入力検証とオンボーディングのロジックを作る
+- [x] 5. 入力検証とオンボーディングのロジックを作る
   - ブランチ: `feat/shared-input-validation` ／ type: `feat` ／ PR タイトル例: `feat(shared): add input validation for auth and onboarding`
   - _Requirements: 1.3, 1.4, 2.1〜2.14, 9.1, 9.2, 11.7, 11.8_
-  - [ ] 5.1 `validateEmail` と `validatePassword` を実装する
+  - [x] 5.1 `validateEmail` と `validatePassword` を実装する
     - _Requirements: 1.3, 1.4_
-  - [ ]* 5.2 メール・パスワード検証のプロパティテストを書く
+  - [x]* 5.2 メール・パスワード検証のプロパティテストを書く
     - **Property 1: メールアドレスとパスワードの検証**
     - **Validates: Requirements 1.3, 1.4**
-  - [ ] 5.3 `classifyPostalCode` を実装する
+  - [x] 5.3 `classifyPostalCode` を実装する
     - 郵便番号表はテスト用の小さな表と、本番用の読み込み口を分ける
     - _Requirements: 2.1, 2.2, 2.3_
-  - [ ]* 5.4 郵便番号の分類のプロパティテストを書く
+  - [x]* 5.4 郵便番号の分類のプロパティテストを書く
     - **Property 3: 郵便番号の分類**
     - **Validates: Requirements 2.1, 2.2, 2.3**
-  - [ ] 5.5 `validateChildren`、`validateFreeText`、`validateDueDate`、`validateHouseholdInput` を実装する
+  - [x] 5.5 `validateChildren`、`validateFreeText`、`validateDueDate`、`validateHouseholdInput` を実装する
     - 人数0〜20、年齢0〜18（0歳は月齢0〜11）、自由記述200文字以内、出産予定日は入力日から10か月後の同日まで（存在しない日は月末）、人数0のときは出産予定日が必須
     - _Requirements: 2.4, 2.5, 2.8〜2.13, 11.7, 11.8_
-  - [ ]* 5.6 入力検証のプロパティテストを書く
+  - [x]* 5.6 入力検証のプロパティテストを書く
     - **Property 4: 子ども・自由記述の入力検証**
     - **Property 5: 世帯入力の必須項目**
     - **Property 7: 出産予定日の範囲**
     - **Validates: Requirements 2.4, 2.5, 2.8〜2.13, 11.7, 11.8**
-  - [ ] 5.7 `splitByConsent` と `applyConsentWithdrawal`、`canReadSensitive` を実装する
+  - [x] 5.7 `splitByConsent` と `applyConsentWithdrawal`、`canReadSensitive` を実装する
     - 同意がなければ状況チップ・自由記述・出産予定日を保存ペイロードから除外する。削除に失敗した状態では読み出しを拒否する
     - _Requirements: 2.6, 2.7, 9.1〜9.4_
-  - [ ] 5.8 同意のプロパティテストを書く（必須）
+  - [x] 5.8 同意のプロパティテストを書く（必須）
     - **Property 6: 同意による要配慮情報の分離**
     - **Property 50: 同意撤回後の要配慮情報**
     - **Validates: Requirements 2.6, 2.7, 9.1〜9.4**
 
-- [ ] 6. 年齢区分・制度判定・表示のロジックを作る
+- [x] 6. 年齢区分・制度判定・表示のロジックを作る
   - ブランチ: `feat/shared-program-matching` ／ type: `feat` ／ PR タイトル例: `feat(shared): add age bands and program matching`
   - _Requirements: 2.7, 2.9, 2.14, 3.13〜3.16, 4.1〜4.10, 10.5, 10.6, 12.4_
-  - [ ] 6.1 `estimateAge`、`ageToBand`、`deriveAgeBands` を実装する
+  - [x] 6.1 `estimateAge`、`ageToBand`、`deriveAgeBands` を実装する
     - _Requirements: 2.7, 2.9, 2.14, 9.3_
-  - [ ]* 6.2 年齢区分のプロパティテストを書く
+  - [x]* 6.2 年齢区分のプロパティテストを書く
     - **Property 8: 推定年齢と年齢区分の変換**
     - **Property 9: 世帯の年齢区分の導出**
     - **Validates: Requirements 2.7, 2.9, 2.14, 3.4, 4.2, 9.3**
-  - [ ] 6.3 `isSearchable`、`applyContentChange`、`applyVerification`、`canVerify` を実装する
+  - [x] 6.3 `isSearchable`、`applyContentChange`、`applyVerification`、`canVerify` を実装する
     - _Requirements: 3.13〜3.16_
-  - [ ]* 6.4 確認状態のプロパティテストを書く
+  - [x]* 6.4 確認状態のプロパティテストを書く
     - **Property 15: 確認済みの制度だけが検索・表示の対象になる**
     - **Property 16: needsReview への遷移と再確認**
     - **Validates: Requirements 3.13, 3.14, 3.15, 4.1, 5.1**
-  - [ ] 6.5 `canVerify` のプロパティテストを書く（必須）
+  - [x] 6.5 `canVerify` のプロパティテストを書く（必須）
     - **Property 17: 確認の権限**
     - **Validates: Requirements 3.16**
-  - [ ] 6.6 `matchPrograms`、`filterByCategory`、`upcomingDeadlines`、`toProgramCard`、`toProgramView` を実装する
+  - [x] 6.6 `matchPrograms`、`filterByCategory`、`upcomingDeadlines`、`toProgramCard`、`toProgramView` を実装する
     - ラベルは常に「対象の可能性」。年齢区分が不明または未設定のものは除外せず「要確認」。締切超過は除外せず注意を付ける。カテゴリは判定の前に適用する
     - _Requirements: 4.1〜4.5, 4.8〜4.10, 10.5, 10.6_
-  - [ ]* 6.7 制度判定と表示のプロパティテストを書く
+  - [x]* 6.7 制度判定と表示のプロパティテストを書く
     - **Property 10: 年齢区分「不明」と未設定の扱い**
     - **Property 18: ダッシュボードの候補判定**
     - **Property 19: Program_Card の整形**
@@ -164,124 +164,124 @@
     - **Property 21: カテゴリ絞り込み**
     - **Property 35: 出典の表示モデル**
     - **Validates: Requirements 2.7, 4.1〜4.5, 4.8〜4.10, 5.1, 10.5, 10.6**
-  - [ ] 6.8 `touchCache`（最大50件、最も長く開かれていないものを削除）を実装する
+  - [x] 6.8 `touchCache`（最大50件、最も長く開かれていないものを削除）を実装する
     - _Requirements: 12.4_
-  - [ ]* 6.9 キャッシュのプロパティテストを書く
+  - [x]* 6.9 キャッシュのプロパティテストを書く
     - **Property 46: オフラインキャッシュの上限**
     - **Validates: Requirements 12.4**
 
-- [ ] 7. 収集のための純粋ロジックを作る
+- [x] 7. 収集のための純粋ロジックを作る
   - ブランチ: `feat/shared-collection-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add pure logic for source collection`
   - _Requirements: 3.1〜3.12, 13.4, 13.5_
-  - [ ] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
+  - [x] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
     - _Requirements: 3.1, 3.2, 3.3, 3.6, 3.11, 3.12_
-  - [ ]* 7.2 取得判定のプロパティテストを書く
+  - [x]* 7.2 取得判定のプロパティテストを書く
     - **Property 11: 取得の判定と置換の決定**
     - **Property 14: 取得上限**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.6, 3.11, 3.12**
-  - [ ] 7.3 `normalizeExtraction` と `chunkSource` を実装する
+  - [x] 7.3 `normalizeExtraction` と `chunkSource` を実装する
     - チャンクは原文抜粋のみで、AI の要約・言い換えを含めない。見出しまたはPDFページ、ハッシュ、年齢区分（読み取れなければ `unknown`）を付ける
     - _Requirements: 3.4, 3.7, 3.9, 3.10_
-  - [ ]* 7.4 抽出とチャンク化のプロパティテストを書く
+  - [x]* 7.4 抽出とチャンク化のプロパティテストを書く
     - **Property 12: 構造化情報の欠落の正規化**
     - **Property 13: チャンクは原文抜粋とメタデータで構成される**
     - **Validates: Requirements 3.4, 3.7, 3.9, 3.10**
-  - [ ] 7.5 `validateSourceRegistration` を実装する
+  - [x] 7.5 `validateSourceRegistration` を実装する
     - _Requirements: 13.4, 13.5_
-  - [ ]* 7.6 情報源登録のプロパティテストを書く
+  - [x]* 7.6 情報源登録のプロパティテストを書く
     - **Property 40: 情報源登録の検証**
     - **Validates: Requirements 13.4, 13.5**
 
-- [ ] 8. 検索計画と、引用・根拠の検証ロジックを作る
+- [x] 8. 検索計画と、引用・根拠の検証ロジックを作る
   - ブランチ: `feat/shared-rag-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add search planning and citation checks`
   - _Requirements: 4.7, 5.1〜5.3, 5.7, 5.9, 5.11〜5.13, 9.9, 9.13_
-  - [ ] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
+  - [x] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
     - フィルタは等価条件のみ（未確認事項 U-1）。年齢区分ごとの真偽値フィールド `band_*` を使い、クエリは21本以下
     - _Requirements: 4.7, 5.1_
-  - [ ]* 8.2 検索計画のプロパティテストを書く
+  - [x]* 8.2 検索計画のプロパティテストを書く
     - **Property 24: 検索クエリ計画と直接フィルタの等価性**
     - **Property 25: 並列クエリ結果の統合**
     - **Property 41: 埋め込みの正規化**
     - **Validates: Requirements 4.7, 5.1**
-  - [ ] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
+  - [x] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
     - 無効な引用は黙って削除しない。再生成は合計1回まで。失敗時の表示モデルは「根拠を確認できませんでした」、出典一覧、問い合わせ窓口で、回答本文を含めない
     - _Requirements: 5.2, 5.3, 5.11, 5.12, 5.13_
-  - [ ]* 8.4 引用・根拠のプロパティテストを書く
+  - [x]* 8.4 引用・根拠のプロパティテストを書く
     - **Property 26: 引用番号の検証**
     - **Property 27: 再生成は合計1回までで、失敗時は fallback になる**
     - **Property 28: 根拠確認の純粋部分**
     - **Validates: Requirements 5.2, 5.3, 5.11, 5.12, 5.13, 14.4**
-  - [ ] 8.5 `validateQuestion`、`limitSuggestions` を実装する
+  - [x] 8.5 `validateQuestion`、`limitSuggestions` を実装する
     - _Requirements: 5.7, 5.9, 13.10_
-  - [ ]* 8.6 質問文と候補のプロパティテストを書く
+  - [x]* 8.6 質問文と候補のプロパティテストを書く
     - **Property 22: 質問文の長さの検証**
     - **Property 23: 次の質問候補の上限**
     - **Validates: Requirements 5.7, 5.9, 13.10**
-  - [ ] 8.7 `buildLlmContext` と `maskPii` を実装する
+  - [x] 8.7 `buildLlmContext` と `maskPii` を実装する
     - LLM に渡す世帯の属性は自治体と年齢区分だけ。出産予定日と要配慮情報は渡さない。電話番号・メール・郵便番号は固定の置換文字列にする
     - _Requirements: 9.9, 9.13_
-  - [ ] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
+  - [x] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
     - **Property 29: LLM に渡す世帯の属性**
     - **Property 30: 質問文の個人情報マスク**
     - **Validates: Requirements 9.9, 9.13**
 
-- [ ] 9. 医療費・通知・アカウント削除のロジックを作る
+- [x] 9. 医療費・通知・アカウント削除のロジックを作る
   - ブランチ: `feat/shared-expense-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add expense, notification and deletion logic`
   - _Requirements: 6.1〜6.5, 7.1, 7.6, 8.3, 8.5_
-  - [ ] 9.1 `validateExpense`、`canSaveExpense`、`aggregateExpenses`、`suggestProgramsFromExpenses` を実装する
+  - [x] 9.1 `validateExpense`、`canSaveExpense`、`aggregateExpenses`、`suggestProgramsFromExpenses` を実装する
     - _Requirements: 6.1〜6.5_
-  - [ ]* 9.2 医療費のプロパティテストを書く
+  - [x]* 9.2 医療費のプロパティテストを書く
     - **Property 31: 医療費記録の検証**
     - **Property 32: 医療費の集計**
     - **Property 33: 医療費からの制度の提示**
     - **Validates: Requirements 6.1〜6.5**
-  - [ ] 9.3 `notificationTimes` と `cancelFor` を実装する（優先度「できれば」の通知で使う）
+  - [x] 9.3 `notificationTimes` と `cancelFor` を実装する（優先度「できれば」の通知で使う）
     - _Requirements: 7.1, 7.6_
-  - [ ]* 9.4 通知計画のプロパティテストを書く
+  - [x]* 9.4 通知計画のプロパティテストを書く
     - **Property 34: 通知の計画と取消**
     - **Validates: Requirements 7.1, 7.6**
-  - [ ] 9.5 `planAccountDeletion` を実装する
+  - [x] 9.5 `planAccountDeletion` を実装する
     - 削除対象は `users/{uid}` 配下と、その `uid` の利用回数ドキュメントだけ。冪等にする
     - _Requirements: 8.3, 8.5_
-  - [ ] 9.6 アカウント削除のプロパティテストを書く（必須）
+  - [x] 9.6 アカウント削除のプロパティテストを書く（必須）
     - **Property 47: アカウント削除の分離性と冪等性**
     - **Validates: Requirements 8.3, 8.5**
 
-- [ ] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
+- [x] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
   - ブランチ: `feat/shared-ops-and-eval-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add quota, switch, reembed and eval logic`
   - _Requirements: 1.9, 1.10, 3.4, 6.1, 12.8, 13.8〜13.14, 14.1〜14.6_
-  - [ ] 10.1 `evaluateRateLimit` を実装する
+  - [x] 10.1 `evaluateRateLimit` を実装する
     - _Requirements: 1.9, 1.10_
-  - [ ] 10.2 レート制限のプロパティテストを書く（必須）
+  - [x] 10.2 レート制限のプロパティテストを書く（必須）
     - **Property 2: レート制限**
     - **Validates: Requirements 1.9, 1.10**
-  - [ ] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
+  - [x] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
     - スイッチの読み取りに失敗してキャッシュが古いときは停止として扱う
     - _Requirements: 13.8, 13.9, 13.11, 13.12_
-  - [ ]* 10.4 日次上限と運営スイッチのプロパティテストを書く
+  - [x]* 10.4 日次上限と運営スイッチのプロパティテストを書く
     - **Property 36: 日本時間の日付キー**
     - **Property 37: 日次上限**
     - **Property 38: 運営スイッチ**
     - **Validates: Requirements 13.8, 13.9, 13.11, 13.12**
-  - [ ] 10.5 `planReembed` と `canCutover` を実装する
+  - [x] 10.5 `planReembed` と `canCutover` を実装する
     - _Requirements: 13.13, 13.14_
-  - [ ]* 10.6 埋め込み再生成のプロパティテストを書く
+  - [x]* 10.6 埋め込み再生成のプロパティテストを書く
     - **Property 42: 埋め込み再生成の不変条件**
     - **Validates: Requirements 13.13, 13.14**
-  - [ ] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
+  - [x] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
     - _Requirements: 12.8, 14.1〜14.5_
-  - [ ]* 10.8 評価指標のプロパティテストを書く
+  - [x]* 10.8 評価指標のプロパティテストを書く
     - **Property 43: 評価指標**
     - **Property 44: パーセンタイルの性質**
     - **Property 45: 評価セットの検証**
     - **Validates: Requirements 12.8, 14.1〜14.5**
-  - [ ] 10.9 Program、Chunk、ExpenseRecord、EvalResult の `encode*` / `decode*` を実装する
+  - [x] 10.9 Program、Chunk、ExpenseRecord、EvalResult の `encode*` / `decode*` を実装する
     - _Requirements: 3.4, 6.1, 14.6_
-  - [ ]* 10.10 変換のプロパティテストを書く
+  - [x]* 10.10 変換のプロパティテストを書く
     - **Property 51: シリアライズのラウンドトリップ**
     - **Validates: Requirements 3.4, 6.1, 14.6**
 
-- [ ] 11. チェックポイント: 共有ロジックの確認
+- [x] 11. チェックポイント: 共有ロジックの確認
   - すべてのテストと CI の必須チェックが成功することを確認する。問題があればユーザーに確認する
 ### フェーズ2: Firestore のルールとインデックス、収集、運営操作
 
@@ -302,30 +302,30 @@
     - `findNearest` と等価条件の事前フィルタの組合せが Emulator で動くかを、統合テストで確認する。`in` や `array-contains` との併用可否も試し、結果を設計書の未確認事項 U-1 の確認記録として PR に書く（設計書は変更しない）。Emulator が対応していない場合は、その旨を記録し、実環境での確認を UW-GC-9 に回す
     - _Requirements: 4.7, 5.1_
 
-- [ ] 13. 公的情報の収集ジョブを作る（`packages/collector`）
+- [x] 13. 公的情報の収集ジョブを作る（`packages/collector`）
   - ブランチ: `feat/collector` ／ type: `feat` ／ PR タイトル例: `feat(collector): collect public sources into verified chunks`
   - 開発とテストは Emulator と差し替え可能な実装（`Fetcher`、`Embedder`、`Llm`、`VectorStore` のインメモリ実装）で行う。実環境での実行は UW-GC-7 の後
   - _Requirements: 3.1〜3.12, 3.15, 13.4, 13.11, 13.13_
-  - [ ] 13.1 外部境界のインターフェースとインメモリ実装を作る
+  - [x] 13.1 外部境界のインターフェースとインメモリ実装を作る
     - `Fetcher`（30秒タイムアウト）、`Embedder`、`Llm.extractProgram`、`VectorStore`、`Clock`、`OpsConfigStore` の型と、テスト用のインメモリ実装
     - _Requirements: 3.1, 3.5_
-  - [ ] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
+  - [x] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
     - 本文は要約せず原文のまま渡す。PDF はページ番号を保持する
     - _Requirements: 3.4, 3.9_
-  - [ ] 13.3 収集の実行ループを作る
+  - [x] 13.3 収集の実行ループを作る
     - 開始時と各取得の直前に運営スイッチを確認する。`isDue` → 取得（再試行最大3回）→ `decideSourceAction` → 置換の順序（`needsReview` と旧チャンクの `searchable=false` → 新チャンクを `searchable=false` で書き込み → 旧チャンクを削除）を守る
     - 1つの情報源の失敗で他を止めない。失敗は `fetchLogs` に出典URL・時刻・原因（個人情報なし）を記録する。`planFetch` の上限と `deferred` の記録
     - 各チャンクに埋め込みのモデル名・次元・版を保存する
     - _Requirements: 3.1〜3.8, 3.11, 3.12, 3.15, 13.11, 13.13_
-  - [ ] 13.4 Vertex AI の実装を作る
+  - [x] 13.4 Vertex AI の実装を作る
     - 埋め込み（`gemini-embedding-001`、出力次元は設定値、L2 正規化）と構造化抽出（JSON スキーマ、欠落は null）。モデル名とリージョンは設定から読む。リージョン指定のエンドポイントを使う
     - _Requirements: 3.3, 3.7, 13.6_
-  - [ ] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
+  - [x] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
     - `upsertChunks`（新チャンクを `searchable=false` で書き込んでから旧チャンクを削除する。バッチ書き込みの上限に合わせて分割する）、`setSearchable`（制度単位でチャンクの `searchable` を更新）、`markExcluded`（情報源単位で検索対象から外す）
     - フィールドは設計書の `chunks` スキーマ（`excerpt`、`emb_{version}`、`embeddingMeta`、`band_*`、`municipalityCode`、`category`、`programId`、`searchable` など）に合わせる
     - Emulator で統合テストを書く: 置換の途中で失敗しても、検索対象（`searchable=true`）に旧版と新版のチャンクが混ざらないこと。再実行しても同じ結果になること（冪等）
     - _Requirements: 3.3, 3.4, 3.6, 3.15, 13.13_
-  - [ ]* 13.6 収集のユニットテストを書く
+  - [x]* 13.6 収集のユニットテストを書く
     - 取得失敗で既存チャンクが変わらないこと、1件の失敗で他が処理されること、404 が2回連続で除外されること、上限到達時の記録、運営スイッチが停止なら取得を始めないこと
     - _Requirements: 3.5, 3.6, 3.8, 3.12, 13.11_
 
@@ -359,79 +359,79 @@
 
 ### フェーズ3: API と出典つき RAG、評価
 
-- [ ] 16. API の基盤を作る（`packages/api`）
+- [x] 16. API の基盤を作る（`packages/api`）
   - ブランチ: `feat/api-foundation` ／ type: `feat` ／ PR タイトル例: `feat(api): add auth, rate limit and quota middleware`
   - _Requirements: 1.9, 1.10, 9.6, 9.7, 9.10, 13.7〜13.12, 15.2, 15.3_
-  - [ ] 16.1 Hono のアプリと共通ミドルウェアを作る
+  - [x] 16.1 Hono のアプリと共通ミドルウェアを作る
     - 順序: レート制限（IP）→ ID トークン検証 → レート制限（ユーザー）→ 認可（`authorizeAccess`）→ 構造化ログ（`redactForLog`）→ エラーハンドラ。超過時は 429 と `Retry-After`
     - `multipart/form-data`（画像）を受け付けるルートを作らない。起動時に `loadConfig` で検証する。シークレットは環境変数（Secret Manager から注入）からのみ読む
     - _Requirements: 1.9, 1.10, 9.5, 9.6, 9.7, 9.10, 13.7_
-  - [ ] 16.2 運営スイッチと日次上限のストアを作る
+  - [x] 16.2 運営スイッチと日次上限のストアを作る
     - `config/operations` を5秒キャッシュで読む。利用回数はトランザクションで全体とユーザー別を同時に判定・加算する。`expireAt` は Timestamp 型
     - _Requirements: 13.8, 13.9, 13.11, 13.12_
-  - [ ] 16.3 所有者検査の統合テストを API に接続する（必須）
+  - [x] 16.3 所有者検査の統合テストを API に接続する（必須）
     - タスク 2.4 の雛形を実際のミドルウェアに接続し、401・403・データ不変を検査する。以降、エンドポイントを追加するたびに表へ行を足す
     - _Requirements: 9.7, 15.2_
-  - [ ] 16.4 ミドルウェアのテストを書く（必須）
+  - [x] 16.4 ミドルウェアのテストを書く（必須）
     - レート制限の 429、ログに質問文やメールが出ないこと（タスク 2.7 のスキャンを API のテストにも適用）
     - _Requirements: 1.10, 15.3_
 
-- [ ] 17. 出典つき RAG チャットを作る
+- [x] 17. 出典つき RAG チャットを作る
   - ブランチ: `feat/rag-chat` ／ type: `feat` ／ PR タイトル例: `feat(api): add grounded chat with citation checks`
   - 実環境での確認は UW-GC-7、UW-GC-9 の後
   - _Requirements: 4.7, 5.1〜5.14, 9.9, 9.13, 10.1〜10.3, 12.1〜12.3, 12.7, 13.10, 13.12_
-  - [ ] 17.1 Firestore の `VectorStore.search` を実装する
+  - [x] 17.1 Firestore の `VectorStore.search` を実装する
     - `planSearchQueries` のクエリを並列に `findNearest`（`DOT_PRODUCT`、`minSimilarity`）で実行し、`mergeResults` で最大5件にする。検索に使う版は `config/embedding` の `searchVersion`
     - _Requirements: 4.7, 5.1, 5.14_
-  - [ ] 17.2 Vertex AI の `Llm` 実装を作る
+  - [x] 17.2 Vertex AI の `Llm` 実装を作る
     - `streamAnswer`（最大出力トークン）、`judgeClaims`（JSON スキーマ）、`classifyIntent`。モデル名は設定から読み、リージョン指定のエンドポイントを使う。プロンプトに入る世帯の属性は `buildLlmContext` の出力だけにする
     - _Requirements: 9.9, 10.1, 13.6, 13.10_
-  - [ ] 17.3 `POST /chat`（SSE）を作る
+  - [x] 17.3 `POST /chat`（SSE）を作る
     - 受付直後に `status` を送る。文字数検証、運営スイッチ、日次上限、意図判定（診断・治療の判断は固定文で拒否）、`maskPii`、検索（0件なら LLM を呼ばず窓口を案内）、生成、引用検証、根拠確認、`nextChatAction` による `verified` / `reset` / `fallback`
     - チャット履歴に保存するのは確定した回答だけ。次の質問候補（最大3件）と、制度の提案（`proposal`）を返す。30秒以内に応答が始まらない場合はエラーにする
     - _Requirements: 5.1〜5.13, 9.13, 10.1〜10.3, 12.1, 12.3, 12.7, 13.12_
-  - [ ] 17.4 チャットの所有者検査とログの検査を追加する（必須）
+  - [x] 17.4 チャットの所有者検査とログの検査を追加する（必須）
     - チャット履歴の他人アクセスの拒否を統合テストの表に追加する。チャットのリクエスト中に、質問文がログに出ないことを検査する
     - _Requirements: 9.7, 15.2, 15.3_
-  - [ ]* 17.5 チャットのユニットテストを書く
+  - [x]* 17.5 チャットのユニットテストを書く
     - 検索0件で LLM を呼ばないこと、診断依頼の拒否、無効な引用での再生成と fallback、上限到達時のメッセージ、ストリームの中断
     - _Requirements: 5.3, 5.4, 5.8, 5.12, 12.7, 13.12_
 
-- [ ] 18. 評価ハーネスを作る（`packages/eval`）
+- [x] 18. 評価ハーネスを作る（`packages/eval`）
   - ブランチ: `feat/eval-harness` ／ type: `feat` ／ PR タイトル例: `feat(eval): add retrieval and answer evaluation`
   - 評価セットの内容の確認は UW-GC-18
   - _Requirements: 12.8, 14.1〜14.8_
-  - [ ] 18.1 評価セットのスキーマと初版を作る
+  - [x] 18.1 評価セットのスキーマと初版を作る
     - 20問以上（答えのない質問3問以上）。各質問に期待する出典URL、含まれるべき事実、カテゴリ。`validateEvalSet` で検証する。初版は AI が下書きし、内容の確認は運営者が行う
     - _Requirements: 14.1, 14.2_
-  - [ ] 18.2 `eval retrieval` と `eval answer` を作る
+  - [x] 18.2 `eval retrieval` と `eval answer` を作る
     - 検索の再現率@5、根拠範囲内率、引用の有効率を別々に計算し、実行日時、評価セットの版、モデル名、埋め込みの版とともに保存する
     - _Requirements: 14.3〜14.7_
-  - [ ] 18.3 性能の計測コマンドを作る
+  - [x] 18.3 性能の計測コマンドを作る
     - 起動済みとコールドスタートのそれぞれで10回ずつ送信し、最初のテキスト断片までの時間の50・90パーセンタイルを記録する
     - _Requirements: 12.1, 12.2, 12.8_
 
-- [ ] 19. チェックポイント: RAG と評価の確認
+- [x] 19. チェックポイント: RAG と評価の確認
   - すべてのテストと CI の必須チェックが成功することを確認する。問題があればユーザーに確認する
 
 ### フェーズ4: 世帯・ダッシュボード・医療費・アカウント削除と画面
 
-- [ ] 20. 世帯・ダッシュボード・医療費・アカウント削除の API を作る
+- [x] 20. 世帯・ダッシュボード・医療費・アカウント削除の API を作る
   - ブランチ: `feat/api-household-and-expenses` ／ type: `feat` ／ PR タイトル例: `feat(api): add household, dashboard, expense and deletion APIs`
   - _Requirements: 2.1〜2.14, 4.1〜4.11, 6.1〜6.6, 8.3〜8.5, 9.1〜9.4, 9.11, 12.4_
-  - [ ] 20.1 世帯情報・同意・郵便番号の API を作る
+  - [x] 20.1 世帯情報・同意・郵便番号の API を作る
     - `GET/PUT /household`、`POST /consents/terms`、`POST /consents/sensitive`、`DELETE /consents/sensitive`（撤回と同時に削除。失敗時は `sensitiveLocked` で読み出しを拒否し、再試行できる）、`GET /postal/:code`
     - _Requirements: 2.1〜2.14, 9.1〜9.4, 9.11_
-  - [ ] 20.2 ダッシュボード・制度・申請の API を作る
+  - [x] 20.2 ダッシュボード・制度・申請の API を作る
     - `GET /dashboard`（セクションごとに結果とエラー）、`GET /programs/:id`（確認済みのみ、`Cache-Control` と `X-Cached-At`）、`PUT /applications/:programId`
     - _Requirements: 4.1〜4.11, 12.4_
-  - [ ] 20.3 医療費の API を作る
+  - [x] 20.3 医療費の API を作る
     - `POST/PUT/DELETE /expenses`、`GET /expenses/summary`（集計と制度の提示）。手入力のみ
     - _Requirements: 6.1〜6.6_
-  - [ ] 20.4 アカウント削除の API を作る
+  - [x] 20.4 アカウント削除の API を作る
     - `DELETE /account`: `deletionJobs/{uid}` を作り、`planAccountDeletion` の対象を削除してから Auth ユーザーを削除する。失敗時はサインイン状態を保ち、再試行できる
     - _Requirements: 8.3〜8.5_
-  - [ ] 20.5 追加したエンドポイントの所有者検査を追加する（必須）
+  - [x] 20.5 追加したエンドポイントの所有者検査を追加する（必須）
     - 世帯情報、子どもの情報、申請状況、医療費記録のそれぞれで、他人の読み書きが 403、未認証が 401、データ不変を統合テストの表に追加する。同意撤回の後に要配慮情報が読めないこと、アカウント削除が他のユーザーのデータを消さないことも検査する
     - _Requirements: 8.3, 9.3, 9.4, 9.7, 15.2_
 

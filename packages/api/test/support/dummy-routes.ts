@@ -1,14 +1,8 @@
 // エンドポイントの実装前に、所有者検査のテストを動かすためのダミーのルート。
-// 実際のルートと同じく requireOwner を通し、Admin SDK で Firestore を読み書きする。
+// 実際のルートと同じく createApi の guards.owner を通し、Admin SDK で Firestore を読み書きする。
 import { FieldValue, type Firestore } from "firebase-admin/firestore";
-import type { Hono } from "hono";
-import {
-  requireOwner,
-  type AppEnv,
-  type DataCategory,
-  type HttpMethod,
-  type IdTokenVerifier,
-} from "../../src/index.js";
+import type { Hono, MiddlewareHandler } from "hono";
+import type { AppEnv, DataCategory, HttpMethod } from "../../src/index.js";
 
 type CategoryStore = {
   /** 対象のドキュメントのパス */
@@ -35,14 +29,15 @@ export function dummyPath(category: DataCategory): string {
 export function mountDummyRoutes(
   app: Hono<AppEnv>,
   db: Firestore,
-  verifier: IdTokenVerifier,
+  // 実際のルートと同じ所有者検査（createApi の guards.owner）
+  owner: MiddlewareHandler<AppEnv>[],
 ): void {
   for (const [category, store] of Object.entries(CATEGORY_STORES) as [
     DataCategory,
     CategoryStore,
   ][]) {
     const path = dummyPath(category);
-    app.use(path, requireOwner(verifier));
+    app.use(path, ...owner);
 
     app.get(path, async (c) => {
       const snap = await db.doc(store.docPath(c.get("uid"))).get();

@@ -36,7 +36,8 @@ export function adminDb(): Firestore {
 /** 本番と同じく Admin SDK で ID トークンを検証する */
 export function emulatorVerifier(): IdTokenVerifier {
   const auth = getAuth(adminApp());
-  return { verifyIdToken: (token) => auth.verifyIdToken(token) };
+  // 本番と同じく失効も確かめる
+  return { verifyIdToken: (token) => auth.verifyIdToken(token, true) };
 }
 
 export type TestUser = { uid: string; idToken: string };

@@ -3,11 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@google/genai": "2.30.0",
     "@hachioji-gov/shared": "*",
+    "@hono/node-server": "2.1.5",
     "firebase-admin": "14.5.0",
     "hono": "4.13.14"
   }
