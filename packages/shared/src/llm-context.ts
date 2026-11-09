@@ -31,8 +31,44 @@ export const PII_PLACEHOLDERS = {
   postalCode: "[郵便番号]",
 } as const;
 
-// ドメインは「.」を1つ以上含むもの。末尾の「.」は文の終わりとして残す
-const EMAIL = /[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+[@＠][A-Za-z0-9-]+\.[A-Za-z0-9.-]+/g;
+const EMAIL_LOCAL_CHARS = "!#$%&'*+/=?^_`{|}~.-";
+
+function isAsciiAlnum(ch: string): boolean {
+  return /^[A-Za-z0-9]$/.test(ch);
+}
+
+/**
+ * メールアドレスを置き換える。正規表現で探すと、@ の無い長い記号の並びで
+ * 処理が文字数の2乗に遅くなるため、@ から左右に1文字ずつ広げて探す（線形時間）。
+ * ドメインは「.」を1つ以上含むもの。末尾の「.」は文の終わりとして残す。
+ */
+function maskEmails(text: string): string {
+  let out = "";
+  let last = 0; // ここまでは out に書き出し済み
+  let runStart = 0; // いま続いているローカル部の文字の並びの先頭
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charAt(i);
+    if (ch !== "@" && ch !== "＠") {
+      if (!isAsciiAlnum(ch) && !EMAIL_LOCAL_CHARS.includes(ch)) runStart = i + 1;
+      continue;
+    }
+    const start = Math.max(runStart, last);
+    let end = i + 1;
+    while (end < text.length && (isAsciiAlnum(text.charAt(end)) || "-.".includes(text.charAt(end))))
+      end++;
+    while (end > i + 1 && text.charAt(end - 1) === ".") end--;
+    const domain = text.slice(i + 1, end);
+    runStart = i + 1;
+    if (start < i && domain.indexOf(".") > 0) {
+      out += text.slice(last, start) + PII_PLACEHOLDERS.email;
+      last = end;
+      runStart = end;
+      i = end - 1;
+    }
+  }
+  return out + text.slice(last);
+}
+
 // 先頭が 0 か +81。区切りはハイフン・括弧・空白。数字が10桁未満のものは電話番号とみなさない
 const PHONE =
   /(?<![0-9０-９])(?:[+＋]81[-‐－−ー]?\s?|[0０])[0-9０-９]{1,4}[-‐－−ー(（)）\s]{0,2}[0-9０-９]{1,4}[-‐－−ー)）\s]{0,2}[0-9０-９]{3,4}(?![0-9０-９])/g;
@@ -51,8 +87,7 @@ function digitCount(s: string): number {
  * 郵便番号を電話番号より先に置き換える（隣の数字と続けて電話番号と誤認しないため）。
  */
 export function maskPii(text: string): string {
-  return text
-    .replace(EMAIL, (m) => PII_PLACEHOLDERS.email + (/\.+$/.exec(m)?.[0] ?? ""))
+  return maskEmails(text)
     .replace(POSTAL, PII_PLACEHOLDERS.postalCode)
     .replace(PHONE, (m) => (digitCount(m) >= 10 ? PII_PLACEHOLDERS.phone : m));
 }

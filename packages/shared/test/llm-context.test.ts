@@ -130,5 +130,15 @@ describe("maskPii (Property 30)", () => {
     // 郵便番号と隣の金額を続けて電話番号にしない
     expect(maskPii("060-0001 500-1000円")).toBe("[郵便番号] 500-1000円");
     expect(maskPii("市役所 042-000-0000 まで")).toBe("市役所 [電話番号] まで");
+    // メールアドレスの末尾の「.」は文の終わりとして残す。ドメインに「.」が無ければ置き換えない
+    expect(maskPii("mail: taro@example.jp.")).toBe("mail: [メールアドレス].");
+    expect(maskPii("連絡はhanako＠example.jpへ")).toBe("連絡は[メールアドレス]へ");
+    expect(maskPii("a@b と @example.jp")).toBe("a@b と @example.jp");
+  });
+
+  it("@ の無い記号の長い並びでも遅くならない", () => {
+    const started = Date.now();
+    maskPii("!".repeat(200_000) + "a".repeat(200_000) + "@".repeat(200_000));
+    expect(Date.now() - started).toBeLessThan(1000);
   });
 });
