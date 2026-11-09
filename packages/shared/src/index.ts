@@ -18,3 +18,6 @@ export * from "./operations.js";
 export * from "./reembed.js";
 export * from "./evaluation.js";
 export * from "./codecs.js";
+export * from "./date.js";
+export * from "./validation.js";
+export * from "./consent.js";
