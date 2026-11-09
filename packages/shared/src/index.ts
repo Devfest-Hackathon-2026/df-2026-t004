@@ -13,3 +13,8 @@ export * from "./search.js";
 export * from "./citations.js";
 export * from "./question.js";
 export * from "./llm-context.js";
+export * from "./rate-limit.js";
+export * from "./operations.js";
+export * from "./reembed.js";
+export * from "./evaluation.js";
+export * from "./codecs.js";
