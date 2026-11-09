@@ -23,3 +23,6 @@ export * from "./validation.js";
 export * from "./consent.js";
 export * from "./age.js";
 export * from "./programs.js";
+export * from "./expense.js";
+export * from "./notifications.js";
+export * from "./deletion.js";
