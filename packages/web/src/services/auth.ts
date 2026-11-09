@@ -1,7 +1,7 @@
 // 認証。登録・ログインは Firebase Authentication の SDK で直接行う（独自のログイン API は作らない）。
 // Firebase の設定が無い開発環境では、ブラウザ内だけで動く仮の認証（モック）を使う。
 
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "@firebase/app";
 import {
   GoogleAuthProvider,
   connectAuthEmulator,
@@ -11,7 +11,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as fbSignOut,
-} from "firebase/auth";
+} from "@firebase/auth";
 import { withTimeout } from "../lib/authErrors";
 import type { AppEnv } from "../lib/env";
 
