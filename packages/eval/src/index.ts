@@ -6,3 +6,4 @@ export const SHARED_REFERENCE = SHARED_PACKAGE;
 
 export * from "./runner.js";
 export * from "./sse.js";
+export * from "./pipeline.js";
