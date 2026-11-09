@@ -170,25 +170,25 @@
     - **Property 46: オフラインキャッシュの上限**
     - **Validates: Requirements 12.4**
 
-- [ ] 7. 収集のための純粋ロジックを作る
+- [x] 7. 収集のための純粋ロジックを作る
   - ブランチ: `feat/shared-collection-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add pure logic for source collection`
   - _Requirements: 3.1〜3.12, 13.4, 13.5_
-  - [ ] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
+  - [x] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
     - _Requirements: 3.1, 3.2, 3.3, 3.6, 3.11, 3.12_
-  - [ ]* 7.2 取得判定のプロパティテストを書く
+  - [x]* 7.2 取得判定のプロパティテストを書く
     - **Property 11: 取得の判定と置換の決定**
     - **Property 14: 取得上限**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.6, 3.11, 3.12**
-  - [ ] 7.3 `normalizeExtraction` と `chunkSource` を実装する
+  - [x] 7.3 `normalizeExtraction` と `chunkSource` を実装する
     - チャンクは原文抜粋のみで、AI の要約・言い換えを含めない。見出しまたはPDFページ、ハッシュ、年齢区分（読み取れなければ `unknown`）を付ける
     - _Requirements: 3.4, 3.7, 3.9, 3.10_
-  - [ ]* 7.4 抽出とチャンク化のプロパティテストを書く
+  - [x]* 7.4 抽出とチャンク化のプロパティテストを書く
     - **Property 12: 構造化情報の欠落の正規化**
     - **Property 13: チャンクは原文抜粋とメタデータで構成される**
     - **Validates: Requirements 3.4, 3.7, 3.9, 3.10**
-  - [ ] 7.5 `validateSourceRegistration` を実装する
+  - [x] 7.5 `validateSourceRegistration` を実装する
     - _Requirements: 13.4, 13.5_
-  - [ ]* 7.6 情報源登録のプロパティテストを書く
+  - [x]* 7.6 情報源登録のプロパティテストを書く
     - **Property 40: 情報源登録の検証**
     - **Validates: Requirements 13.4, 13.5**
 

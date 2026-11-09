@@ -6,3 +6,6 @@ export * from "./config.js";
 export * from "./authorize.js";
 export * from "./log.js";
 export * from "./log-scan.js";
+export * from "./collection.js";
+export * from "./extraction.js";
+export * from "./source-registration.js";
