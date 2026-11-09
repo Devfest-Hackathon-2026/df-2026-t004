@@ -15,6 +15,19 @@ export default tseslint.config(
       globals: { ...globals.node },
     },
   },
+  // Web（PWA）はブラウザで、Service Worker はワーカーで動く
+  {
+    files: ["packages/web/src/**/*.{ts,tsx}"],
+    languageOptions: {
+      globals: { ...globals.browser },
+    },
+  },
+  {
+    files: ["packages/web/src/sw.ts"],
+    languageOptions: {
+      globals: { ...globals.serviceworker },
+    },
+  },
   // 最後に置き、Prettier と衝突する整形ルールを無効化する
   prettier,
 );
