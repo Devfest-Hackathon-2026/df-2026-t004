@@ -7,7 +7,7 @@ import { serve } from "@hono/node-server";
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { createLogger, loadConfig } from "@hachioji-gov/shared";
+import { createLogger, loadConfig, SAMPLE_POSTAL_TABLE } from "@hachioji-gov/shared";
 import {
   FirestoreChatStore,
   FirestoreChatVectorStore,
@@ -16,6 +16,13 @@ import {
 import { mountChat } from "./chat/route.js";
 import { VertexChat } from "./chat/vertex.js";
 import { createSwitchReader, FirestoreOpsConfigStore, FirestoreUsageStore } from "./operations.js";
+import {
+  AccountDeleter,
+  FirestoreAccountStatus,
+  FirestoreHouseholdStore,
+  mountHousehold,
+} from "./household.js";
+import { FirestoreProgramStore, FirestoreUserRecords, mountDashboard } from "./dashboard.js";
 import { createApi } from "./server.js";
 
 const logger = createLogger();
@@ -42,7 +49,9 @@ async function main(): Promise<void> {
   const db = getFirestore(firebase);
   const api = createApi({
     config,
-    verifier: { verifyIdToken: (token) => auth.verifyIdToken(token) },
+    // 失効も確かめる（削除・無効化したユーザーの古いトークンを通さない）
+    verifier: { verifyIdToken: (token) => auth.verifyIdToken(token, true) },
+    accountStatus: new FirestoreAccountStatus(db),
     logger,
   });
   const vertex = new VertexChat({
@@ -72,6 +81,32 @@ async function main(): Promise<void> {
       fieldPrefix: config.embedding.fieldPrefix,
       firstTokenTimeoutSec: config.chat.firstTokenTimeoutSec,
     },
+  });
+  const householdStore = new FirestoreHouseholdStore(db);
+  mountHousehold(api, {
+    store: householdStore,
+    deleter: new AccountDeleter(db, {
+      deleteUser: async (uid) => {
+        try {
+          await auth.deleteUser(uid);
+          return "ok";
+        } catch (error) {
+          const code: unknown =
+            error !== null && typeof error === "object" ? Reflect.get(error, "code") : undefined;
+          if (code === "auth/user-not-found") return "user-not-found";
+          throw error;
+        }
+      },
+    }),
+    // 全国の郵便番号データは未投入。投入までは開発用の小さな表を使う
+    postal: SAMPLE_POSTAL_TABLE,
+    now: () => new Date(),
+  });
+  mountDashboard(api, {
+    household: householdStore,
+    programs: new FirestoreProgramStore(db),
+    records: new FirestoreUserRecords(db),
+    now: () => new Date(),
   });
   api.app.get("/healthz", (c) => c.json({ ok: true }));
   const port = Number(process.env["PORT"] ?? "8080");

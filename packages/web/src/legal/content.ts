@@ -3,6 +3,8 @@
 // これは下書きであり、法的な助言ではない。公開前に運営者が内容を確認する。
 // 【要確認】の箇所は、運営者の情報や未確認事項（UW-GC-7 など）の結果で置き換える。
 
+import { LEGAL_VERSION } from "@hachioji-gov/shared";
+
 export type LegalSection = {
   readonly heading: string;
   readonly paragraphs: readonly string[];
@@ -16,8 +18,8 @@ export type LegalDocument = {
   readonly sections: readonly LegalSection[];
 };
 
-/** 利用規約とプライバシーポリシーの版。文面を変えたら上げる（再同意が必要になる） */
-export const LEGAL_VERSION = "2026-11-draft1";
+// 版は API の記録と揃えるため shared に置いている（文面を変えたら shared の LEGAL_VERSION を上げる）
+export { LEGAL_VERSION };
 
 const OPERATOR = "【要確認：運営者の名称】";
 const CONTACT = "【要確認：問い合わせ先（メールアドレスまたはフォームのURL）】";

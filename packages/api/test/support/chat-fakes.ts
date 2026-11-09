@@ -100,7 +100,11 @@ export class FakeChatStore implements ChatStore {
     return this.version;
   }
 
+  // true なら削除中として保存しない
+  deleting = false;
+
   async saveChat(uid: string, record: ChatRecord) {
+    if (this.deleting) return null;
     const list = this.chats.get(uid) ?? [];
     const id = `chat${list.length + 1}`;
     list.push({ ...record, id });

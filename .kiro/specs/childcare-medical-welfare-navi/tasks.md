@@ -247,7 +247,7 @@
     - **Property 47: アカウント削除の分離性と冪等性**
     - **Validates: Requirements 8.3, 8.5**
 
-- [ ] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
+- [x] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
   - ブランチ: `feat/shared-ops-and-eval-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add quota, switch, reembed and eval logic`
   - _Requirements: 1.9, 1.10, 3.4, 6.1, 12.8, 13.8〜13.14, 14.1〜14.6_
   - [x] 10.1 `evaluateRateLimit` を実装する
@@ -275,9 +275,9 @@
     - **Property 44: パーセンタイルの性質**
     - **Property 45: 評価セットの検証**
     - **Validates: Requirements 12.8, 14.1〜14.5**
-  - [ ] 10.9 Program、Chunk、ExpenseRecord、EvalResult の `encode*` / `decode*` を実装する
+  - [x] 10.9 Program、Chunk、ExpenseRecord、EvalResult の `encode*` / `decode*` を実装する
     - _Requirements: 3.4, 6.1, 14.6_
-  - [ ]* 10.10 変換のプロパティテストを書く
+  - [x]* 10.10 変換のプロパティテストを書く
     - **Property 51: シリアライズのラウンドトリップ**
     - **Validates: Requirements 3.4, 6.1, 14.6**
 
@@ -416,22 +416,22 @@
 
 ### フェーズ4: 世帯・ダッシュボード・医療費・アカウント削除と画面
 
-- [ ] 20. 世帯・ダッシュボード・医療費・アカウント削除の API を作る
+- [x] 20. 世帯・ダッシュボード・医療費・アカウント削除の API を作る
   - ブランチ: `feat/api-household-and-expenses` ／ type: `feat` ／ PR タイトル例: `feat(api): add household, dashboard, expense and deletion APIs`
   - _Requirements: 2.1〜2.14, 4.1〜4.11, 6.1〜6.6, 8.3〜8.5, 9.1〜9.4, 9.11, 12.4_
-  - [ ] 20.1 世帯情報・同意・郵便番号の API を作る
+  - [x] 20.1 世帯情報・同意・郵便番号の API を作る
     - `GET/PUT /household`、`POST /consents/terms`、`POST /consents/sensitive`、`DELETE /consents/sensitive`（撤回と同時に削除。失敗時は `sensitiveLocked` で読み出しを拒否し、再試行できる）、`GET /postal/:code`
     - _Requirements: 2.1〜2.14, 9.1〜9.4, 9.11_
-  - [ ] 20.2 ダッシュボード・制度・申請の API を作る
+  - [x] 20.2 ダッシュボード・制度・申請の API を作る
     - `GET /dashboard`（セクションごとに結果とエラー）、`GET /programs/:id`（確認済みのみ、`Cache-Control` と `X-Cached-At`）、`PUT /applications/:programId`
     - _Requirements: 4.1〜4.11, 12.4_
-  - [ ] 20.3 医療費の API を作る
+  - [x] 20.3 医療費の API を作る
     - `POST/PUT/DELETE /expenses`、`GET /expenses/summary`（集計と制度の提示）。手入力のみ
     - _Requirements: 6.1〜6.6_
-  - [ ] 20.4 アカウント削除の API を作る
+  - [x] 20.4 アカウント削除の API を作る
     - `DELETE /account`: `deletionJobs/{uid}` を作り、`planAccountDeletion` の対象を削除してから Auth ユーザーを削除する。失敗時はサインイン状態を保ち、再試行できる
     - _Requirements: 8.3〜8.5_
-  - [ ] 20.5 追加したエンドポイントの所有者検査を追加する（必須）
+  - [x] 20.5 追加したエンドポイントの所有者検査を追加する（必須）
     - 世帯情報、子どもの情報、申請状況、医療費記録のそれぞれで、他人の読み書きが 403、未認証が 401、データ不変を統合テストの表に追加する。同意撤回の後に要配慮情報が読めないこと、アカウント削除が他のユーザーのデータを消さないことも検査する
     - _Requirements: 8.3, 9.3, 9.4, 9.7, 15.2_
 

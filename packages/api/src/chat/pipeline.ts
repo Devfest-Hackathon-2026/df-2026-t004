@@ -90,7 +90,8 @@ export type ChatOutcome =
   | "fallback"
   | "timeout"
   | "failed"
-  | "aborted";
+  | "aborted"
+  | "account_deleting";
 
 class FirstTokenTimeout extends Error {
   override name = "FirstTokenTimeout";
@@ -321,6 +322,14 @@ export async function runChat(
       sources: citedSources,
       createdAt: deps.now().toISOString(),
     });
+    if (chatId === null) {
+      // 回答を作っている間にアカウントの削除が始まった。確定させずに終える
+      await emit("error", {
+        reason: "account_deleting",
+        message: "アカウントの削除中のため、回答を保存できませんでした。",
+      });
+      return "account_deleting";
+    }
     await emit("verified", { text, chatId });
     await emit("sources", { sources: citedSources });
     const programs = [

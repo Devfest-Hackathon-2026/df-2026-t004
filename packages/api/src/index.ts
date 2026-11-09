@@ -15,3 +15,5 @@ export * from "./chat/pipeline.js";
 export * from "./chat/route.js";
 export * from "./chat/firestore.js";
 export * from "./chat/vertex.js";
+export * from "./household.js";
+export * from "./dashboard.js";
