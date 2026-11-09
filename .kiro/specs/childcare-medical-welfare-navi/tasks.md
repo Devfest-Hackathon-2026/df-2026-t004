@@ -105,58 +105,58 @@
 
 ### フェーズ1: 共有の純粋ロジック（`packages/shared`）
 
-- [ ] 5. 入力検証とオンボーディングのロジックを作る
+- [x] 5. 入力検証とオンボーディングのロジックを作る
   - ブランチ: `feat/shared-input-validation` ／ type: `feat` ／ PR タイトル例: `feat(shared): add input validation for auth and onboarding`
   - _Requirements: 1.3, 1.4, 2.1〜2.14, 9.1, 9.2, 11.7, 11.8_
-  - [ ] 5.1 `validateEmail` と `validatePassword` を実装する
+  - [x] 5.1 `validateEmail` と `validatePassword` を実装する
     - _Requirements: 1.3, 1.4_
-  - [ ]* 5.2 メール・パスワード検証のプロパティテストを書く
+  - [x]* 5.2 メール・パスワード検証のプロパティテストを書く
     - **Property 1: メールアドレスとパスワードの検証**
     - **Validates: Requirements 1.3, 1.4**
-  - [ ] 5.3 `classifyPostalCode` を実装する
+  - [x] 5.3 `classifyPostalCode` を実装する
     - 郵便番号表はテスト用の小さな表と、本番用の読み込み口を分ける
     - _Requirements: 2.1, 2.2, 2.3_
-  - [ ]* 5.4 郵便番号の分類のプロパティテストを書く
+  - [x]* 5.4 郵便番号の分類のプロパティテストを書く
     - **Property 3: 郵便番号の分類**
     - **Validates: Requirements 2.1, 2.2, 2.3**
-  - [ ] 5.5 `validateChildren`、`validateFreeText`、`validateDueDate`、`validateHouseholdInput` を実装する
+  - [x] 5.5 `validateChildren`、`validateFreeText`、`validateDueDate`、`validateHouseholdInput` を実装する
     - 人数0〜20、年齢0〜18（0歳は月齢0〜11）、自由記述200文字以内、出産予定日は入力日から10か月後の同日まで（存在しない日は月末）、人数0のときは出産予定日が必須
     - _Requirements: 2.4, 2.5, 2.8〜2.13, 11.7, 11.8_
-  - [ ]* 5.6 入力検証のプロパティテストを書く
+  - [x]* 5.6 入力検証のプロパティテストを書く
     - **Property 4: 子ども・自由記述の入力検証**
     - **Property 5: 世帯入力の必須項目**
     - **Property 7: 出産予定日の範囲**
     - **Validates: Requirements 2.4, 2.5, 2.8〜2.13, 11.7, 11.8**
-  - [ ] 5.7 `splitByConsent` と `applyConsentWithdrawal`、`canReadSensitive` を実装する
+  - [x] 5.7 `splitByConsent` と `applyConsentWithdrawal`、`canReadSensitive` を実装する
     - 同意がなければ状況チップ・自由記述・出産予定日を保存ペイロードから除外する。削除に失敗した状態では読み出しを拒否する
     - _Requirements: 2.6, 2.7, 9.1〜9.4_
-  - [ ] 5.8 同意のプロパティテストを書く（必須）
+  - [x] 5.8 同意のプロパティテストを書く（必須）
     - **Property 6: 同意による要配慮情報の分離**
     - **Property 50: 同意撤回後の要配慮情報**
     - **Validates: Requirements 2.6, 2.7, 9.1〜9.4**
 
-- [ ] 6. 年齢区分・制度判定・表示のロジックを作る
+- [x] 6. 年齢区分・制度判定・表示のロジックを作る
   - ブランチ: `feat/shared-program-matching` ／ type: `feat` ／ PR タイトル例: `feat(shared): add age bands and program matching`
   - _Requirements: 2.7, 2.9, 2.14, 3.13〜3.16, 4.1〜4.10, 10.5, 10.6, 12.4_
-  - [ ] 6.1 `estimateAge`、`ageToBand`、`deriveAgeBands` を実装する
+  - [x] 6.1 `estimateAge`、`ageToBand`、`deriveAgeBands` を実装する
     - _Requirements: 2.7, 2.9, 2.14, 9.3_
-  - [ ]* 6.2 年齢区分のプロパティテストを書く
+  - [x]* 6.2 年齢区分のプロパティテストを書く
     - **Property 8: 推定年齢と年齢区分の変換**
     - **Property 9: 世帯の年齢区分の導出**
     - **Validates: Requirements 2.7, 2.9, 2.14, 3.4, 4.2, 9.3**
-  - [ ] 6.3 `isSearchable`、`applyContentChange`、`applyVerification`、`canVerify` を実装する
+  - [x] 6.3 `isSearchable`、`applyContentChange`、`applyVerification`、`canVerify` を実装する
     - _Requirements: 3.13〜3.16_
-  - [ ]* 6.4 確認状態のプロパティテストを書く
+  - [x]* 6.4 確認状態のプロパティテストを書く
     - **Property 15: 確認済みの制度だけが検索・表示の対象になる**
     - **Property 16: needsReview への遷移と再確認**
     - **Validates: Requirements 3.13, 3.14, 3.15, 4.1, 5.1**
-  - [ ] 6.5 `canVerify` のプロパティテストを書く（必須）
+  - [x] 6.5 `canVerify` のプロパティテストを書く（必須）
     - **Property 17: 確認の権限**
     - **Validates: Requirements 3.16**
-  - [ ] 6.6 `matchPrograms`、`filterByCategory`、`upcomingDeadlines`、`toProgramCard`、`toProgramView` を実装する
+  - [x] 6.6 `matchPrograms`、`filterByCategory`、`upcomingDeadlines`、`toProgramCard`、`toProgramView` を実装する
     - ラベルは常に「対象の可能性」。年齢区分が不明または未設定のものは除外せず「要確認」。締切超過は除外せず注意を付ける。カテゴリは判定の前に適用する
     - _Requirements: 4.1〜4.5, 4.8〜4.10, 10.5, 10.6_
-  - [ ]* 6.7 制度判定と表示のプロパティテストを書く
+  - [x]* 6.7 制度判定と表示のプロパティテストを書く
     - **Property 10: 年齢区分「不明」と未設定の扱い**
     - **Property 18: ダッシュボードの候補判定**
     - **Property 19: Program_Card の整形**
@@ -164,9 +164,9 @@
     - **Property 21: カテゴリ絞り込み**
     - **Property 35: 出典の表示モデル**
     - **Validates: Requirements 2.7, 4.1〜4.5, 4.8〜4.10, 5.1, 10.5, 10.6**
-  - [ ] 6.8 `touchCache`（最大50件、最も長く開かれていないものを削除）を実装する
+  - [x] 6.8 `touchCache`（最大50件、最も長く開かれていないものを削除）を実装する
     - _Requirements: 12.4_
-  - [ ]* 6.9 キャッシュのプロパティテストを書く
+  - [x]* 6.9 キャッシュのプロパティテストを書く
     - **Property 46: オフラインキャッシュの上限**
     - **Validates: Requirements 12.4**
 
@@ -225,25 +225,25 @@
     - **Property 30: 質問文の個人情報マスク**
     - **Validates: Requirements 9.9, 9.13**
 
-- [ ] 9. 医療費・通知・アカウント削除のロジックを作る
+- [x] 9. 医療費・通知・アカウント削除のロジックを作る
   - ブランチ: `feat/shared-expense-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add expense, notification and deletion logic`
   - _Requirements: 6.1〜6.5, 7.1, 7.6, 8.3, 8.5_
-  - [ ] 9.1 `validateExpense`、`canSaveExpense`、`aggregateExpenses`、`suggestProgramsFromExpenses` を実装する
+  - [x] 9.1 `validateExpense`、`canSaveExpense`、`aggregateExpenses`、`suggestProgramsFromExpenses` を実装する
     - _Requirements: 6.1〜6.5_
-  - [ ]* 9.2 医療費のプロパティテストを書く
+  - [x]* 9.2 医療費のプロパティテストを書く
     - **Property 31: 医療費記録の検証**
     - **Property 32: 医療費の集計**
     - **Property 33: 医療費からの制度の提示**
     - **Validates: Requirements 6.1〜6.5**
-  - [ ] 9.3 `notificationTimes` と `cancelFor` を実装する（優先度「できれば」の通知で使う）
+  - [x] 9.3 `notificationTimes` と `cancelFor` を実装する（優先度「できれば」の通知で使う）
     - _Requirements: 7.1, 7.6_
-  - [ ]* 9.4 通知計画のプロパティテストを書く
+  - [x]* 9.4 通知計画のプロパティテストを書く
     - **Property 34: 通知の計画と取消**
     - **Validates: Requirements 7.1, 7.6**
-  - [ ] 9.5 `planAccountDeletion` を実装する
+  - [x] 9.5 `planAccountDeletion` を実装する
     - 削除対象は `users/{uid}` 配下と、その `uid` の利用回数ドキュメントだけ。冪等にする
     - _Requirements: 8.3, 8.5_
-  - [ ] 9.6 アカウント削除のプロパティテストを書く（必須）
+  - [x] 9.6 アカウント削除のプロパティテストを書く（必須）
     - **Property 47: アカウント削除の分離性と冪等性**
     - **Validates: Requirements 8.3, 8.5**
 
@@ -281,7 +281,7 @@
     - **Property 51: シリアライズのラウンドトリップ**
     - **Validates: Requirements 3.4, 6.1, 14.6**
 
-- [ ] 11. チェックポイント: 共有ロジックの確認
+- [x] 11. チェックポイント: 共有ロジックの確認
   - すべてのテストと CI の必須チェックが成功することを確認する。問題があればユーザーに確認する
 ### フェーズ2: Firestore のルールとインデックス、収集、運営操作
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   aggregateExpenses,
   applyVerification,
+  canSaveExpense,
   expenseDateMin,
   suggestProgramsFromExpenses,
   validateExpense,
@@ -24,7 +25,7 @@ const SUBJECTS = ["c1", "c2"];
 
 // Feature: childcare-medical-welfare-navi, Property 31: 医療費記録の検証
 // Validates: Requirements 6.1, 6.3, 6.4
-describe("validateExpense (Property 31)", () => {
+describe("validateExpense / canSaveExpense (Property 31)", () => {
   const facility = fc
     .integer({ min: 0, max: 120 })
     .chain((n) =>
@@ -49,11 +50,10 @@ describe("validateExpense (Property 31)", () => {
         subject,
         (today, k, [n, f], a, s) => {
           const date = shiftDays(today, k);
-          const r = validateExpense(
-            { date, facility: f, amountYen: a, subjectId: s },
-            today,
-            SUBJECTS,
-          );
+          const input = { date, facility: f, amountYen: a, subjectId: s };
+          const r = validateExpense(input, today, SUBJECTS);
+          // 保存ボタンを有効にする判定は、検証の結果と常に一致する
+          expect(canSaveExpense(input, today, SUBJECTS)).toBe(r.ok);
           const dateOk = date <= today && date >= expenseDateMin(today)!;
           const facilityOk = n >= 1 && n <= 100;
           const amountOk = Number.isInteger(a) && a >= 1 && a <= 9_999_999;
