@@ -36,7 +36,7 @@
     - `config/app.config.json` の雛形（`region`、`ai.*Model`、`embedding.*`、`rag.*`、`limits.*`、`rateLimit.*`、`collector.*`）。モデル名はプレースホルダのまま（未確認事項 U-5）
     - `packages/shared` に zod スキーマと `loadConfig`。必須キーの欠落・空をすべてのキー名つきで報告して失敗する
     - _Requirements: 13.6, 13.7_
-  - [ ]* 1.4 `loadConfig` のプロパティテストを書く
+  - [x]* 1.4 `loadConfig` のプロパティテストを書く
     - **Property 39: 設定の検証**
     - **Validates: Requirements 13.6, 13.7**
   - [x] 1.5 Firebase Emulator の設定を作る
@@ -100,7 +100,7 @@
     - ブランチ運用、コミット規約、必須チェック、ローカルでの実行方法（typecheck、lint、test、test:integration、gitleaks）
     - _Requirements: 15.8, 15.9, 15.10_
 
-- [ ] 4. チェックポイント: フェーズ0 の確認
+- [x] 4. チェックポイント: フェーズ0 の確認
   - すべてのテストと CI の8つのジョブが成功することを確認する。問題があればユーザーに確認する
 
 ### フェーズ1: 共有の純粋ロジック（`packages/shared`）
