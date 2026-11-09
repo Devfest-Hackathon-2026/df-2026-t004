@@ -95,6 +95,35 @@ describe("FirestoreChatStore", () => {
     expect(list[0]?.id).toEqual(expect.any(String));
   });
 
+  it.each([
+    ["削除ジョブが running", { job: "running" }],
+    ["削除ジョブが failed", { job: "failed" }],
+    ["削除ジョブが done", { job: "done" }],
+    ["users/{uid}.deleting", { deleting: true }],
+  ])("%s なら保存せず null を返す", async (_label, mark) => {
+    const db = adminDb();
+    if ("job" in mark) await db.doc("deletionJobs/u1").set({ state: mark.job });
+    if ("deleting" in mark) await db.doc("users/u1").set({ deleting: true });
+    const store = new FirestoreChatStore(db, "v1");
+    const id = await store.saveChat("u1", {
+      question: "質問",
+      answer: "回答[1]",
+      sources: [],
+      createdAt: "2026-11-09T01:00:00.000Z",
+    });
+    expect(id).toBeNull();
+    expect((await db.collection("users/u1/chats").get()).size).toBe(0);
+    // 他の人は保存できる
+    expect(
+      await store.saveChat("u2", {
+        question: "質問",
+        answer: "回答[1]",
+        sources: [],
+        createdAt: "2026-11-09T01:00:00.000Z",
+      }),
+    ).toEqual(expect.any(String));
+  });
+
   it("検索の版は config/embedding から読み、無ければ既定の版", async () => {
     const db = adminDb();
     const store = new FirestoreChatStore(db, "v1");
