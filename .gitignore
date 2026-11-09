@@ -30,3 +30,6 @@ Thumbs.db
 # Kiro のローカル設定（仕様書とステアリングは管理する）
 .kiro/settings/
 .kiro/steering
+# Playwright（packages/web の E2E）
+test-results/
+playwright-report/

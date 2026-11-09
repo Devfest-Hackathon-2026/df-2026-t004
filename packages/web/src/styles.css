@@ -73,7 +73,8 @@ ol {
   min-height: 100dvh;
   margin: 0 auto;
   background: var(--surface);
-  overflow-x: hidden;
+  /* hidden だとスクロールの基準になり、ヘッダーや入力欄の sticky が効かなくなる */
+  overflow-x: clip;
 }
 .screen {
   min-height: 100dvh;
