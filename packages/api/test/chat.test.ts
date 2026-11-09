@@ -193,6 +193,16 @@ describe("POST /chat", () => {
     expect(t.store.chats.size).toBe(0);
   });
 
+  it("回答を作っている間にアカウントの削除が始まったら、保存も確定もしない", async () => {
+    const t = setup();
+    t.store.deleting = true;
+    const { events } = await t.ask({ question: "児童手当はいくらですか" });
+    expect(names(events)).not.toContain("verified");
+    expect(names(events).at(-1)).toBe("error");
+    expect(dataOf(events, "error")?.["reason"]).toBe("account_deleting");
+    expect(t.store.chats.size).toBe(0);
+  });
+
   it("生成に失敗したら generation_failed を返す", async () => {
     const t = setup();
     t.llm.failGenerate = true;

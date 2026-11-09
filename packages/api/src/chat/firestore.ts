@@ -86,9 +86,23 @@ export class FirestoreChatStore implements ChatStore {
       : this.defaultVersion;
   }
 
-  async saveChat(uid: string, record: ChatRecord): Promise<string> {
-    const ref = await this.db.collection("users").doc(uid).collection("chats").add(record);
-    return ref.id;
+  /**
+   * 削除の途中で回答を作っていた場合に、削除の後で履歴を作り直さないよう、
+   * 削除ジョブが存在する（running・failed・done）か deleting のときは書かない。
+   * 削除はジョブとフラグを書いてから recursiveDelete を始めるので、
+   * こちらが先に書いた場合も、その履歴は recursiveDelete で消える。
+   */
+  async saveChat(uid: string, record: ChatRecord): Promise<string | null> {
+    const user = this.db.collection("users").doc(uid);
+    const job = this.db.collection("deletionJobs").doc(uid);
+    const ref = user.collection("chats").doc();
+    const saved = await this.db.runTransaction(async (tx) => {
+      const [u, j] = await tx.getAll(user, job);
+      if (j?.exists === true || u?.get("deleting") === true) return false;
+      tx.create(ref, record);
+      return true;
+    });
+    return saved ? ref.id : null;
   }
 
   async listChats(uid: string, limit: number): Promise<(ChatRecord & { id: string })[]> {
