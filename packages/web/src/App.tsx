@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { OfflineBanner, UpdatePrompt } from "./components/pwa";
 import { TabBar } from "./components/ui";
 import { showsTabBar } from "./lib/tabs";
+import { PRIVACY, TERMS } from "./legal/content";
+import { LegalPage } from "./screens/Legal";
 import { Placeholder } from "./screens/Placeholder";
 import { ProgramDetail } from "./screens/ProgramDetail";
 
@@ -31,6 +33,8 @@ export default function App() {
               <Route path="/chat" element={<Placeholder title="AI相談" task="T24（#25）" />} />
               <Route path="/my" element={<Placeholder title="マイホーム" task="T25（#26）" />} />
               <Route path="/programs/:id" element={<ProgramDetail />} />
+              <Route path="/terms" element={<LegalPage doc={TERMS} />} />
+              <Route path="/privacy" element={<LegalPage doc={PRIVACY} />} />
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           </m.div>

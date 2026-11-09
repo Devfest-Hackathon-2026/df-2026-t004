@@ -736,3 +736,19 @@ fieldset.group > legend {
 .card.install {
   border-color: var(--accent);
 }
+
+/* Legal pages */
+.legal {
+  gap: 24px;
+}
+.legal p,
+.legal li {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.legal ul {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
