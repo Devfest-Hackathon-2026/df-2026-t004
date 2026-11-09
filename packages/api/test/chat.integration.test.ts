@@ -112,23 +112,30 @@ describe("FirestoreChatStore", () => {
 });
 
 describe("FirestoreHouseholdReader", () => {
-  it("自治体と子どもの年齢区分、同意のある出産予定日から妊娠中を読む", async () => {
+  it("自治体と子どもの推定年齢の区分、同意のある出産予定日から妊娠中を読む", async () => {
     const db = adminDb();
     await db.doc("users/u1").set({
-      household: { municipalityCode: "13201" },
-      children: [{ ageYears: 1 }, { ageYears: 7 }],
+      household: {
+        municipalityCode: "13201",
+        children: [
+          { id: "c1", ageYears: 1, recordedAt: "2026-11-01" },
+          { id: "c2", ageYears: 7, recordedAt: "2026-11-01" },
+        ],
+      },
+      consents: { sensitive: { version: "2026-11", grantedAt: "2026-11-01T00:00:00.000Z" } },
     });
-    await db.doc("users/u1/sensitive/profile").set({ dueDate: "2027-03-01" });
-    const reader = new FirestoreHouseholdReader(db);
+    await db.doc("users/u1/sensitive/profile").set({
+      situationChips: [],
+      pregnancy: { dueDate: "2027-03-01" },
+    });
+    const reader = new FirestoreHouseholdReader(db, () => new Date("2026-11-09T03:00:00.000Z"));
     const got = await reader.read("u1");
     expect(got?.municipalityCode).toBe("13201");
-    expect(new Set(got?.ageBands as string[])).toEqual(
-      new Set(["age_0_2", "age_6_11", "pregnancy"]),
-    );
+    expect(got?.ageBands).toEqual(["pregnancy", "age_0_2", "age_6_11"]);
 
-    // 要配慮情報を止めていれば使わない
+    // 要配慮情報がロックされていれば使わない
     await db.doc("users/u1").set({ sensitiveLocked: true }, { merge: true });
-    expect((await reader.read("u1"))?.ageBands).not.toContain("pregnancy");
+    expect((await reader.read("u1"))?.ageBands).toEqual(["age_0_2", "age_6_11"]);
     expect(await reader.read("nobody")).toBeNull();
   });
 });

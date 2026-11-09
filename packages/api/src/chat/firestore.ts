@@ -1,6 +1,6 @@
 // チャットの Firestore 実装（Requirement 4.7, 5.1, 5.14）
 
-import { mergeResults, type SourceAgeBand } from "@hachioji-gov/shared";
+import { deriveAgeBands, mergeResults, todayJst, type StoredChild } from "@hachioji-gov/shared";
 import type { Firestore, Query } from "firebase-admin/firestore";
 import type {
   ChatRecord,
@@ -103,24 +103,15 @@ export class FirestoreChatStore implements ChatStore {
   }
 }
 
-// 子どもの年齢（歳）から年齢区分にする
-function bandOfAge(age: number): SourceAgeBand | null {
-  if (!Number.isInteger(age) || age < 0) return null;
-  if (age <= 2) return "age_0_2";
-  if (age <= 5) return "age_3_5";
-  if (age <= 11) return "age_6_11";
-  if (age <= 14) return "age_12_14";
-  if (age <= 18) return "age_15_18";
-  return null;
-}
-
 /**
- * users/{uid} の世帯情報から、自治体と年齢区分を読む。
- * 妊娠中の区分は保存せず、同意のある要配慮情報（sensitive/profile の出産予定日）から導く。
- * 世帯の保存形式は T20 で確定させる（ここは自治体コードと子どもの年齢だけを使う）。
+ * users/{uid} の世帯情報から、自治体と年齢区分を読む（区分は保存せず毎回導出する）。
+ * 妊娠中の区分は、同意があり、ロックされていないときだけ sensitive/profile の出産予定日から導く。
  */
 export class FirestoreHouseholdReader implements HouseholdReader {
-  constructor(private readonly db: Firestore) {}
+  constructor(
+    private readonly db: Firestore,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async read(uid: string): Promise<HouseholdAttributes | null> {
     const user = this.db.collection("users").doc(uid);
@@ -128,27 +119,35 @@ export class FirestoreHouseholdReader implements HouseholdReader {
       user.get(),
       user.collection("sensitive").doc("profile").get(),
     ]);
-    if (!snap.exists) return null;
     const household: unknown = snap.get("household");
-    const children: unknown = snap.get("children");
-    const bands = new Set<SourceAgeBand>();
-    if (Array.isArray(children)) {
-      for (const child of children as unknown[]) {
-        const age: unknown =
-          child !== null && typeof child === "object" ? Reflect.get(child, "ageYears") : undefined;
-        const band = typeof age === "number" ? bandOfAge(age) : null;
-        if (band !== null) bands.add(band);
-      }
-    }
-    if (snap.get("sensitiveLocked") !== true && typeof sensitive.get("dueDate") === "string") {
-      bands.add("pregnancy");
-    }
-    return {
-      municipalityCode:
-        household !== null && typeof household === "object"
-          ? Reflect.get(household, "municipalityCode")
-          : null,
-      ageBands: [...bands],
-    };
+    if (!snap.exists || household === null || typeof household !== "object") return null;
+    const children: unknown = Reflect.get(household, "children");
+    const stored: StoredChild[] = Array.isArray(children)
+      ? (children as unknown[]).flatMap((c): StoredChild[] => {
+          if (c === null || typeof c !== "object") return [];
+          const ageYears: unknown = Reflect.get(c, "ageYears");
+          const ageMonths: unknown = Reflect.get(c, "ageMonths");
+          const recordedAt: unknown = Reflect.get(c, "recordedAt");
+          if (typeof ageYears !== "number" || typeof recordedAt !== "string") return [];
+          return [
+            {
+              id: "",
+              ageYears,
+              recordedAt,
+              ...(typeof ageMonths === "number" ? { ageMonths } : {}),
+            },
+          ];
+        })
+      : [];
+    const consent =
+      snap.get("consents.sensitive") !== undefined && snap.get("sensitiveLocked") !== true;
+    const dueDate: unknown = sensitive.get("pregnancy.dueDate");
+    const { bands } = deriveAgeBands(
+      stored,
+      typeof dueDate === "string" ? { dueDate } : null,
+      consent,
+      todayJst(this.now()),
+    );
+    return { municipalityCode: Reflect.get(household, "municipalityCode"), ageBands: [...bands] };
   }
 }

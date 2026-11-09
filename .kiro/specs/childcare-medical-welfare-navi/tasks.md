@@ -419,7 +419,7 @@
 - [ ] 20. 世帯・ダッシュボード・医療費・アカウント削除の API を作る
   - ブランチ: `feat/api-household-and-expenses` ／ type: `feat` ／ PR タイトル例: `feat(api): add household, dashboard, expense and deletion APIs`
   - _Requirements: 2.1〜2.14, 4.1〜4.11, 6.1〜6.6, 8.3〜8.5, 9.1〜9.4, 9.11, 12.4_
-  - [ ] 20.1 世帯情報・同意・郵便番号の API を作る
+  - [x] 20.1 世帯情報・同意・郵便番号の API を作る
     - `GET/PUT /household`、`POST /consents/terms`、`POST /consents/sensitive`、`DELETE /consents/sensitive`（撤回と同時に削除。失敗時は `sensitiveLocked` で読み出しを拒否し、再試行できる）、`GET /postal/:code`
     - _Requirements: 2.1〜2.14, 9.1〜9.4, 9.11_
   - [ ] 20.2 ダッシュボード・制度・申請の API を作る
@@ -428,7 +428,7 @@
   - [ ] 20.3 医療費の API を作る
     - `POST/PUT/DELETE /expenses`、`GET /expenses/summary`（集計と制度の提示）。手入力のみ
     - _Requirements: 6.1〜6.6_
-  - [ ] 20.4 アカウント削除の API を作る
+  - [x] 20.4 アカウント削除の API を作る
     - `DELETE /account`: `deletionJobs/{uid}` を作り、`planAccountDeletion` の対象を削除してから Auth ユーザーを削除する。失敗時はサインイン状態を保ち、再試行できる
     - _Requirements: 8.3〜8.5_
   - [ ] 20.5 追加したエンドポイントの所有者検査を追加する（必須）
