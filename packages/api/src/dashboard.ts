@@ -295,8 +295,13 @@ export function mountDashboard(api: Api, deps: DashboardDeps): void {
     if (body === null) return c.json({ error: "invalid_request" }, 400);
     const program = await deps.programs.get(c.req.param("programId"));
     if (program === null) return c.json({ error: "not_found" }, 404);
+    // 新しく作るのは確認済みの制度だけ（確認前の制度と締切を画面に出さない）。
+    // すでにある申請は、あとで要再確認になった制度でも更新できるようにする
+    const uid = c.get("uid");
+    const existing = await deps.records.getApplication(uid, program.id);
+    if (existing === null && !isSearchable(program)) return c.json({ error: "not_found" }, 404);
     const a: Application = { programId: program.id, deadline: program.deadline, ...body };
-    await deps.records.saveApplication(c.get("uid"), a, deps.now().toISOString());
+    await deps.records.saveApplication(uid, a, deps.now().toISOString());
     return c.json(a);
   });
 

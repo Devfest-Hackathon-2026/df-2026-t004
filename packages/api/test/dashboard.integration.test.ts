@@ -238,6 +238,30 @@ describe("申請", () => {
     expect(await doc(`users/${owner.uid}/applications/missing`)).toBeUndefined();
   });
 
+  it("確認前・要再確認・除外の制度には新しく申請を作れない", async () => {
+    const t = setup();
+    for (const id of ["city-unverified", "city-review", "city-excluded"]) {
+      const res = await t.call("PUT", `/applications/${id}`, owner, update);
+      expect(res.status).toBe(404);
+      expect(JSON.stringify(await res.json())).not.toContain("2026-12-31");
+      expect(await doc(`users/${owner.uid}/applications/${id}`)).toBeUndefined();
+    }
+  });
+
+  it("すでにある申請は、あとで要再確認になった制度でも更新できる", async () => {
+    const t = setup();
+    await t.call("PUT", "/applications/city-baby", owner, update);
+    await adminDb().doc("programs/city-baby").update({ needsReview: true });
+    const res = await t.call("PUT", "/applications/city-baby", owner, {
+      status: "done",
+      tasks: [],
+    });
+    expect(res.status).toBe(200);
+    expect(await doc(`users/${owner.uid}/applications/city-baby`)).toMatchObject({
+      status: "done",
+    });
+  });
+
   it("他の人の操作は本人の申請を変えない", async () => {
     const t = setup();
     await t.call("PUT", "/applications/city-baby", owner, update);
