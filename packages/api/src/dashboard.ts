@@ -300,7 +300,9 @@ export function mountDashboard(api: Api, deps: DashboardDeps): void {
     const uid = c.get("uid");
     const existing = await deps.records.getApplication(uid, program.id);
     if (existing === null && !isSearchable(program)) return c.json({ error: "not_found" }, 404);
-    const a: Application = { programId: program.id, deadline: program.deadline, ...body };
+    // 確認済みでない制度の締切はまだ確かめていない値なので、保存してある締切を使う
+    const deadline = isSearchable(program) ? program.deadline : (existing?.deadline ?? null);
+    const a: Application = { programId: program.id, deadline, ...body };
     await deps.records.saveApplication(uid, a, deps.now().toISOString());
     return c.json(a);
   });

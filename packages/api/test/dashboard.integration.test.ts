@@ -251,14 +251,17 @@ describe("申請", () => {
   it("すでにある申請は、あとで要再確認になった制度でも更新できる", async () => {
     const t = setup();
     await t.call("PUT", "/applications/city-baby", owner, update);
-    await adminDb().doc("programs/city-baby").update({ needsReview: true });
+    await adminDb().doc("programs/city-baby").update({ needsReview: true, deadline: "2027-01-31" });
     const res = await t.call("PUT", "/applications/city-baby", owner, {
       status: "done",
       tasks: [],
     });
     expect(res.status).toBe(200);
+    // 確認前の締切ではなく、保存してあった締切のまま
+    expect(await res.json()).toMatchObject({ status: "done", deadline: "2026-12-31" });
     expect(await doc(`users/${owner.uid}/applications/city-baby`)).toMatchObject({
       status: "done",
+      deadline: "2026-12-31",
     });
   });
 
