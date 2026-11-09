@@ -250,27 +250,27 @@
 - [ ] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
   - ブランチ: `feat/shared-ops-and-eval-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add quota, switch, reembed and eval logic`
   - _Requirements: 1.9, 1.10, 3.4, 6.1, 12.8, 13.8〜13.14, 14.1〜14.6_
-  - [ ] 10.1 `evaluateRateLimit` を実装する
+  - [x] 10.1 `evaluateRateLimit` を実装する
     - _Requirements: 1.9, 1.10_
-  - [ ] 10.2 レート制限のプロパティテストを書く（必須）
+  - [x] 10.2 レート制限のプロパティテストを書く（必須）
     - **Property 2: レート制限**
     - **Validates: Requirements 1.9, 1.10**
-  - [ ] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
+  - [x] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
     - スイッチの読み取りに失敗してキャッシュが古いときは停止として扱う
     - _Requirements: 13.8, 13.9, 13.11, 13.12_
-  - [ ]* 10.4 日次上限と運営スイッチのプロパティテストを書く
+  - [x]* 10.4 日次上限と運営スイッチのプロパティテストを書く
     - **Property 36: 日本時間の日付キー**
     - **Property 37: 日次上限**
     - **Property 38: 運営スイッチ**
     - **Validates: Requirements 13.8, 13.9, 13.11, 13.12**
-  - [ ] 10.5 `planReembed` と `canCutover` を実装する
+  - [x] 10.5 `planReembed` と `canCutover` を実装する
     - _Requirements: 13.13, 13.14_
-  - [ ]* 10.6 埋め込み再生成のプロパティテストを書く
+  - [x]* 10.6 埋め込み再生成のプロパティテストを書く
     - **Property 42: 埋め込み再生成の不変条件**
     - **Validates: Requirements 13.13, 13.14**
-  - [ ] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
+  - [x] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
     - _Requirements: 12.8, 14.1〜14.5_
-  - [ ]* 10.8 評価指標のプロパティテストを書く
+  - [x]* 10.8 評価指標のプロパティテストを書く
     - **Property 43: 評価指標**
     - **Property 44: パーセンタイルの性質**
     - **Property 45: 評価セットの検証**
