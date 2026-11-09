@@ -170,57 +170,57 @@
     - **Property 46: オフラインキャッシュの上限**
     - **Validates: Requirements 12.4**
 
-- [ ] 7. 収集のための純粋ロジックを作る
+- [x] 7. 収集のための純粋ロジックを作る
   - ブランチ: `feat/shared-collection-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add pure logic for source collection`
   - _Requirements: 3.1〜3.12, 13.4, 13.5_
-  - [ ] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
+  - [x] 7.1 `isDue`、`decideSourceAction`、`planFetch` を実装する
     - _Requirements: 3.1, 3.2, 3.3, 3.6, 3.11, 3.12_
-  - [ ]* 7.2 取得判定のプロパティテストを書く
+  - [x]* 7.2 取得判定のプロパティテストを書く
     - **Property 11: 取得の判定と置換の決定**
     - **Property 14: 取得上限**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.6, 3.11, 3.12**
-  - [ ] 7.3 `normalizeExtraction` と `chunkSource` を実装する
+  - [x] 7.3 `normalizeExtraction` と `chunkSource` を実装する
     - チャンクは原文抜粋のみで、AI の要約・言い換えを含めない。見出しまたはPDFページ、ハッシュ、年齢区分（読み取れなければ `unknown`）を付ける
     - _Requirements: 3.4, 3.7, 3.9, 3.10_
-  - [ ]* 7.4 抽出とチャンク化のプロパティテストを書く
+  - [x]* 7.4 抽出とチャンク化のプロパティテストを書く
     - **Property 12: 構造化情報の欠落の正規化**
     - **Property 13: チャンクは原文抜粋とメタデータで構成される**
     - **Validates: Requirements 3.4, 3.7, 3.9, 3.10**
-  - [ ] 7.5 `validateSourceRegistration` を実装する
+  - [x] 7.5 `validateSourceRegistration` を実装する
     - _Requirements: 13.4, 13.5_
-  - [ ]* 7.6 情報源登録のプロパティテストを書く
+  - [x]* 7.6 情報源登録のプロパティテストを書く
     - **Property 40: 情報源登録の検証**
     - **Validates: Requirements 13.4, 13.5**
 
-- [ ] 8. 検索計画と、引用・根拠の検証ロジックを作る
+- [x] 8. 検索計画と、引用・根拠の検証ロジックを作る
   - ブランチ: `feat/shared-rag-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add search planning and citation checks`
   - _Requirements: 4.7, 5.1〜5.3, 5.7, 5.9, 5.11〜5.13, 9.9, 9.13_
-  - [ ] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
+  - [x] 8.1 `planSearchQueries` と `mergeResults`、`l2Normalize` を実装する
     - フィルタは等価条件のみ（未確認事項 U-1）。年齢区分ごとの真偽値フィールド `band_*` を使い、クエリは21本以下
     - _Requirements: 4.7, 5.1_
-  - [ ]* 8.2 検索計画のプロパティテストを書く
+  - [x]* 8.2 検索計画のプロパティテストを書く
     - **Property 24: 検索クエリ計画と直接フィルタの等価性**
     - **Property 25: 並列クエリ結果の統合**
     - **Property 41: 埋め込みの正規化**
     - **Validates: Requirements 4.7, 5.1**
-  - [ ] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
+  - [x] 8.3 `parseCitations`、`validateCitations`、`splitClaims`、`buildGroundingInputs`、`aggregateGrounding`、`nextChatAction` を実装する
     - 無効な引用は黙って削除しない。再生成は合計1回まで。失敗時の表示モデルは「根拠を確認できませんでした」、出典一覧、問い合わせ窓口で、回答本文を含めない
     - _Requirements: 5.2, 5.3, 5.11, 5.12, 5.13_
-  - [ ]* 8.4 引用・根拠のプロパティテストを書く
+  - [x]* 8.4 引用・根拠のプロパティテストを書く
     - **Property 26: 引用番号の検証**
     - **Property 27: 再生成は合計1回までで、失敗時は fallback になる**
     - **Property 28: 根拠確認の純粋部分**
     - **Validates: Requirements 5.2, 5.3, 5.11, 5.12, 5.13, 14.4**
-  - [ ] 8.5 `validateQuestion`、`limitSuggestions` を実装する
+  - [x] 8.5 `validateQuestion`、`limitSuggestions` を実装する
     - _Requirements: 5.7, 5.9, 13.10_
-  - [ ]* 8.6 質問文と候補のプロパティテストを書く
+  - [x]* 8.6 質問文と候補のプロパティテストを書く
     - **Property 22: 質問文の長さの検証**
     - **Property 23: 次の質問候補の上限**
     - **Validates: Requirements 5.7, 5.9, 13.10**
-  - [ ] 8.7 `buildLlmContext` と `maskPii` を実装する
+  - [x] 8.7 `buildLlmContext` と `maskPii` を実装する
     - LLM に渡す世帯の属性は自治体と年齢区分だけ。出産予定日と要配慮情報は渡さない。電話番号・メール・郵便番号は固定の置換文字列にする
     - _Requirements: 9.9, 9.13_
-  - [ ] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
+  - [x] 8.8 LLM に渡す情報のプロパティテストを書く（必須）
     - **Property 29: LLM に渡す世帯の属性**
     - **Property 30: 質問文の個人情報マスク**
     - **Validates: Requirements 9.9, 9.13**
@@ -250,27 +250,27 @@
 - [ ] 10. 日次上限・運営スイッチ・埋め込みの版管理・評価指標・変換のロジックを作る
   - ブランチ: `feat/shared-ops-and-eval-logic` ／ type: `feat` ／ PR タイトル例: `feat(shared): add quota, switch, reembed and eval logic`
   - _Requirements: 1.9, 1.10, 3.4, 6.1, 12.8, 13.8〜13.14, 14.1〜14.6_
-  - [ ] 10.1 `evaluateRateLimit` を実装する
+  - [x] 10.1 `evaluateRateLimit` を実装する
     - _Requirements: 1.9, 1.10_
-  - [ ] 10.2 レート制限のプロパティテストを書く（必須）
+  - [x] 10.2 レート制限のプロパティテストを書く（必須）
     - **Property 2: レート制限**
     - **Validates: Requirements 1.9, 1.10**
-  - [ ] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
+  - [x] 10.3 `dateKeyJst`、`evaluateQuota`、`resolveSwitch` を実装する
     - スイッチの読み取りに失敗してキャッシュが古いときは停止として扱う
     - _Requirements: 13.8, 13.9, 13.11, 13.12_
-  - [ ]* 10.4 日次上限と運営スイッチのプロパティテストを書く
+  - [x]* 10.4 日次上限と運営スイッチのプロパティテストを書く
     - **Property 36: 日本時間の日付キー**
     - **Property 37: 日次上限**
     - **Property 38: 運営スイッチ**
     - **Validates: Requirements 13.8, 13.9, 13.11, 13.12**
-  - [ ] 10.5 `planReembed` と `canCutover` を実装する
+  - [x] 10.5 `planReembed` と `canCutover` を実装する
     - _Requirements: 13.13, 13.14_
-  - [ ]* 10.6 埋め込み再生成のプロパティテストを書く
+  - [x]* 10.6 埋め込み再生成のプロパティテストを書く
     - **Property 42: 埋め込み再生成の不変条件**
     - **Validates: Requirements 13.13, 13.14**
-  - [ ] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
+  - [x] 10.7 `recallAtK`、`groundedRate`、`citationValidRate`、`percentile`、`validateEvalSet` を実装する
     - _Requirements: 12.8, 14.1〜14.5_
-  - [ ]* 10.8 評価指標のプロパティテストを書く
+  - [x]* 10.8 評価指標のプロパティテストを書く
     - **Property 43: 評価指標**
     - **Property 44: パーセンタイルの性質**
     - **Property 45: 評価セットの検証**
@@ -302,30 +302,30 @@
     - `findNearest` と等価条件の事前フィルタの組合せが Emulator で動くかを、統合テストで確認する。`in` や `array-contains` との併用可否も試し、結果を設計書の未確認事項 U-1 の確認記録として PR に書く（設計書は変更しない）。Emulator が対応していない場合は、その旨を記録し、実環境での確認を UW-GC-9 に回す
     - _Requirements: 4.7, 5.1_
 
-- [ ] 13. 公的情報の収集ジョブを作る（`packages/collector`）
+- [x] 13. 公的情報の収集ジョブを作る（`packages/collector`）
   - ブランチ: `feat/collector` ／ type: `feat` ／ PR タイトル例: `feat(collector): collect public sources into verified chunks`
   - 開発とテストは Emulator と差し替え可能な実装（`Fetcher`、`Embedder`、`Llm`、`VectorStore` のインメモリ実装）で行う。実環境での実行は UW-GC-7 の後
   - _Requirements: 3.1〜3.12, 3.15, 13.4, 13.11, 13.13_
-  - [ ] 13.1 外部境界のインターフェースとインメモリ実装を作る
+  - [x] 13.1 外部境界のインターフェースとインメモリ実装を作る
     - `Fetcher`（30秒タイムアウト）、`Embedder`、`Llm.extractProgram`、`VectorStore`、`Clock`、`OpsConfigStore` の型と、テスト用のインメモリ実装
     - _Requirements: 3.1, 3.5_
-  - [ ] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
+  - [x] 13.2 HTML と PDF から本文と見出し・ページを取り出す処理を作る
     - 本文は要約せず原文のまま渡す。PDF はページ番号を保持する
     - _Requirements: 3.4, 3.9_
-  - [ ] 13.3 収集の実行ループを作る
+  - [x] 13.3 収集の実行ループを作る
     - 開始時と各取得の直前に運営スイッチを確認する。`isDue` → 取得（再試行最大3回）→ `decideSourceAction` → 置換の順序（`needsReview` と旧チャンクの `searchable=false` → 新チャンクを `searchable=false` で書き込み → 旧チャンクを削除）を守る
     - 1つの情報源の失敗で他を止めない。失敗は `fetchLogs` に出典URL・時刻・原因（個人情報なし）を記録する。`planFetch` の上限と `deferred` の記録
     - 各チャンクに埋め込みのモデル名・次元・版を保存する
     - _Requirements: 3.1〜3.8, 3.11, 3.12, 3.15, 13.11, 13.13_
-  - [ ] 13.4 Vertex AI の実装を作る
+  - [x] 13.4 Vertex AI の実装を作る
     - 埋め込み（`gemini-embedding-001`、出力次元は設定値、L2 正規化）と構造化抽出（JSON スキーマ、欠落は null）。モデル名とリージョンは設定から読む。リージョン指定のエンドポイントを使う
     - _Requirements: 3.3, 3.7, 13.6_
-  - [ ] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
+  - [x] 13.5 Firestore 版の `VectorStore` の書き込みを実装する
     - `upsertChunks`（新チャンクを `searchable=false` で書き込んでから旧チャンクを削除する。バッチ書き込みの上限に合わせて分割する）、`setSearchable`（制度単位でチャンクの `searchable` を更新）、`markExcluded`（情報源単位で検索対象から外す）
     - フィールドは設計書の `chunks` スキーマ（`excerpt`、`emb_{version}`、`embeddingMeta`、`band_*`、`municipalityCode`、`category`、`programId`、`searchable` など）に合わせる
     - Emulator で統合テストを書く: 置換の途中で失敗しても、検索対象（`searchable=true`）に旧版と新版のチャンクが混ざらないこと。再実行しても同じ結果になること（冪等）
     - _Requirements: 3.3, 3.4, 3.6, 3.15, 13.13_
-  - [ ]* 13.6 収集のユニットテストを書く
+  - [x]* 13.6 収集のユニットテストを書く
     - 取得失敗で既存チャンクが変わらないこと、1件の失敗で他が処理されること、404 が2回連続で除外されること、上限到達時の記録、運営スイッチが停止なら取得を始めないこと
     - _Requirements: 3.5, 3.6, 3.8, 3.12, 13.11_
 
@@ -401,13 +401,13 @@
   - ブランチ: `feat/eval-harness` ／ type: `feat` ／ PR タイトル例: `feat(eval): add retrieval and answer evaluation`
   - 評価セットの内容の確認は UW-GC-18
   - _Requirements: 12.8, 14.1〜14.8_
-  - [ ] 18.1 評価セットのスキーマと初版を作る
+  - [x] 18.1 評価セットのスキーマと初版を作る
     - 20問以上（答えのない質問3問以上）。各質問に期待する出典URL、含まれるべき事実、カテゴリ。`validateEvalSet` で検証する。初版は AI が下書きし、内容の確認は運営者が行う
     - _Requirements: 14.1, 14.2_
   - [ ] 18.2 `eval retrieval` と `eval answer` を作る
     - 検索の再現率@5、根拠範囲内率、引用の有効率を別々に計算し、実行日時、評価セットの版、モデル名、埋め込みの版とともに保存する
     - _Requirements: 14.3〜14.7_
-  - [ ] 18.3 性能の計測コマンドを作る
+  - [x] 18.3 性能の計測コマンドを作る
     - 起動済みとコールドスタートのそれぞれで10回ずつ送信し、最初のテキスト断片までの時間の50・90パーセンタイルを記録する
     - _Requirements: 12.1, 12.2, 12.8_
 
