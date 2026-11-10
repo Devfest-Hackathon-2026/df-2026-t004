@@ -30,11 +30,37 @@ const NON_CLAIM: readonly RegExp[] = [
   /^こんにちは/,
   /(?:について|を)(?:ご)?(?:説明|案内|紹介|回答)(?:いた)?します$/,
   /^(?:以下|次)の(?:とおり|通り)です$/,
+  // 結びの「窓口で確認してください」。数字（電話番号・金額・日付）を含むものは事実として残す
+  /^(?=[^0-9０-９]{1,60}$)(?=.*窓口)(?=.*確認).*ください$/,
 ];
+
+const OPEN_BRACKETS = "（(「『【";
+const CLOSE_BRACKETS = "）)」』】";
+
+/** 改行と、括弧の外にある句点で文に分ける（「（〜除きます。〜）[5]」を1文に保つ） */
+function splitSentences(text: string): string[] {
+  const out: string[] = [];
+  let current = "";
+  let depth = 0;
+  for (const ch of text) {
+    if (ch === "\n" || (ch === "。" && depth === 0)) {
+      out.push(current);
+      current = "";
+      if (ch === "\n") depth = 0;
+      continue;
+    }
+    if (OPEN_BRACKETS.includes(ch)) depth += 1;
+    else if (CLOSE_BRACKETS.includes(ch)) depth = Math.max(0, depth - 1);
+    current += ch;
+  }
+  out.push(current);
+  return out;
+}
 
 /**
  * 回答を句点（。）と改行で文に分け、事実を述べる文ごとに引用番号を取り出す。
  * - 「〜です。[1]」のように句点の後に付いた引用は、その文に含める
+ * - 括弧の中の句点では分けない（引用は括弧の後に付くため、分けると前半が引用なしになる）
  * - 引用のある文は、見た目が見出しなどでも必ず主張として残す（検証から漏らさない）
  */
 export function splitClaims(text: string): Claim[] {
@@ -43,7 +69,7 @@ export function splitClaims(text: string): Claim[] {
   let moved = text;
   while (moved.replace(trailing, "$1。") !== moved) moved = moved.replace(trailing, "$1。");
   const claims: Claim[] = [];
-  for (const raw of moved.split(/[。\n]/)) {
+  for (const raw of splitSentences(moved)) {
     const sentence = raw.trim();
     if (sentence === "") continue;
     const citations = parseCitations(sentence);
