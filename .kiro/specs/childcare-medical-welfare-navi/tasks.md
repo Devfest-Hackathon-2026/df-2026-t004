@@ -329,28 +329,28 @@
     - 取得失敗で既存チャンクが変わらないこと、1件の失敗で他が処理されること、404 が2回連続で除外されること、上限到達時の記録、運営スイッチが停止なら取得を始めないこと
     - _Requirements: 3.5, 3.6, 3.8, 3.12, 13.11_
 
-- [ ] 14. 運営者の CLI を作る（`packages/admin`）
+- [x] 14. 運営者の CLI を作る（`packages/admin`）
   - ブランチ: `feat/admin-cli` ／ type: `feat` ／ PR タイトル例: `feat(admin): add operator CLI for verification and switches`
   - 実環境での実行には UW-GC-12（運営者の資格情報と admin クレーム）が必要
   - _Requirements: 3.13〜3.16, 13.4, 13.5, 13.11, 13.14_
-  - [ ] 14.1 `verify` と `unverify` を作る
+  - [x] 14.1 `verify` と `unverify` を作る
     - 原文とハッシュを表示し、確認を対話で求めてから `applyVerification` を書き込み、該当チャンクを `searchable=true` にする。途中で失敗しても再実行で完了する
     - _Requirements: 3.13, 3.14, 3.15_
-  - [ ] 14.2 `ops stop|start [ai|collection]` と `grant-admin <uid>` を作る
+  - [x] 14.2 `ops stop|start [ai|collection]` と `grant-admin <uid>` を作る
     - `grant-admin` はカスタムクレーム `admin` を付与する。操作対象のプロジェクトを必ず明示させる
     - _Requirements: 3.16, 13.11_
-  - [ ] 14.3 `sources add` を作る
+  - [x] 14.3 `sources add` を作る
     - `validateSourceRegistration` で検証し、失敗時は既存の登録を変えずに欠落・無効な項目名を表示する
     - _Requirements: 13.4, 13.5_
-  - [ ] 14.4 `reembed`（`--to`、`--verify`、`--cleanup`）と `embedding set-search-version` を作る
+  - [x] 14.4 `reembed`（`--to`、`--verify`、`--cleanup`）と `embedding set-search-version` を作る
     - `planReembed` で対象を選び、原文抜粋から再生成する。`canCutover` が偽なら切り替えを拒否する。再生成中も既存の版で検索できる状態を保つ
     - _Requirements: 13.13, 13.14_
-  - [ ] 14.5 初期の情報源リストの下書きと一括登録コマンドを作る
+  - [x] 14.5 初期の情報源リストの下書きと一括登録コマンドを作る
     - 八王子市（`13201`）・東京都（`13000`）・国（`00000`）の公開ページと PDF から、子育て支援、子どもの医療費助成、予防接種、妊娠・出産、外来・救急の案内に関するものを Web で調べ、`config/sources.seed.json` に下書きする（URL、`municipalityCode`、レベル、`html`／`pdf`、カテゴリ、取得間隔、確認状況を「未確認」）。1回の実行の取得上限（100ページ、1情報源あたり PDF 10件）に収まる件数にする
     - `sources import <file>` を作る。各行を `validateSourceRegistration` で検証し、登録済みの URL は飛ばす（冪等）。失敗した行と理由を一覧で表示し、既存の登録は変えない
     - 下書きの内容と各サイトの利用規約・robots.txt の確認、実環境への登録は運営者が行う（UW-GC-20）
     - _Requirements: 3.1, 13.4, 13.5_
-  - [ ]* 14.6 CLI のユニットテストを書く
+  - [x]* 14.6 CLI のユニットテストを書く
     - `admin` クレームのない主体の拒否、`verify` の冪等性、切り替えの拒否条件
     - _Requirements: 3.16, 13.14_
 

@@ -12,10 +12,9 @@
 | --- | --- | --- |
 | `scripts/gen-indexes.ts` | リポジトリ構成 | 手順5（インデックス作成） |
 | `scripts/verify-indexes.ts` | 埋め込みの版管理と再生成 | 手順5（インデックス検証） |
-| `packages/admin`（admin CLI） | 運営による確認と管理操作 | 手順6、手順7、手順13（運営スイッチ、管理者クレーム） |
 | `packages/api`、`packages/collector` | リポジトリ構成 | 手順10、手順11 |
 
-admin CLI のコマンド名は設計書の記載（`ops stop|start`、`grant-admin`、`verify` など）に従っています。実際の起動方法（例: npm スクリプト名）は実装時に決まるため、この文書の `admin ...` は実装後に読み替えてください。
+admin CLI は、リポジトリ直下で `npm run admin -- --project <プロジェクトID> <コマンド>` として実行します（`--project` は必須）。この文書の `admin ...` は、この形に読み替えてください。コマンドの一覧は `npm run admin -- --help` で表示できます。
 
 ## 0. 前提
 
@@ -345,11 +344,11 @@ gcloud auth application-default set-quota-project $PROJECT_ID
 2. 付与します。
 
 ```powershell
-# 要確認: 実際の起動方法は packages/admin の実装後に確定
-admin grant-admin <自分のUID>
+npm run admin -- --project $PROJECT_ID grant-admin <自分のUID>
+# 確認のため、プロジェクト ID の入力を求められます
 ```
 
-> **未実装の注記:** `packages/admin` はまだ存在しません。実装が終わるまでこの手順は実行できません。
+`verify` と `unverify` は、`--operator <自分のUID>` を付けて実行します。CLI はこの uid の `admin` クレームを Firebase Authentication から読み、無ければ拒否します。
 
 3. クレームはトークンに含まれます。付与後は、いったんサインアウトして再度サインインし、新しいトークンを取得してください。
 4. 確認: 管理者のみが通る操作（例: `verify` の実行）が成功し、管理者でないアカウントでは拒否されること。
@@ -545,14 +544,14 @@ API への振り分け（`/api/**` を Cloud Run にリライトする場合）�
 
 運営開始前に、`config/operations` と `config/embedding` の初期ドキュメントを作ります。
 
-1. admin CLI で作る方法（実装後。**未実装**）:
+1. admin CLI で作る方法:
 
 ```powershell
-# 要確認: 起動方法・引数は packages/admin の実装後に確定
-admin ops start ai
-admin ops start collection
-admin embedding set-search-version v1
+npm run admin -- --project $PROJECT_ID ops stop
+npm run admin -- --project $PROJECT_ID embedding set-search-version v1
 ```
+
+`ops stop` は `config/operations` を `aiEnabled: false`、`collectionEnabled: false` で作ります（`updatedAt` は ISO 8601 の文字列）。`embedding set-search-version` は、検索対象のチャンクすべてに指定の版がそろっていないと拒否します（チャンクがまだ無いときは通ります）。
 
 2. Firebase コンソールから手作業で作る方法（admin CLI が使えるようになるまで）: Firestore → データ → コレクション `config` → ドキュメントID `operations` → フィールド `aiEnabled`（boolean）、`collectionEnabled`（boolean）、`updatedAt`（timestamp または設計書の型に合わせる）、`updatedBy`（string）を追加します。`config/embedding` には `searchVersion`（string、値 `v1`）を追加します。（要確認: 型は実装時に設計書のデータモデルに合わせる）
 
@@ -561,7 +560,7 @@ admin embedding set-search-version v1
 ### 13-3. 日常の操作
 
 ```powershell
-# 要確認: 起動方法は実装後に確定。コマンド名は設計書に従う
+# admin は npm run admin -- --project $PROJECT_ID と読み替える
 admin ops stop ai            # AI 相談を停止
 admin ops start ai           # AI 相談を再開
 admin ops stop collection    # 収集を停止
@@ -665,8 +664,8 @@ $globalPerDay = 500
 - [ ] Vertex AI のデータ保持条件を公式で確認し、ゼロデータ保持を前提にしていない。リクエスト・レスポンスのログを有効にしていない。キャッシュ設定を確認した
 - [ ] リージョン指定のエンドポイントを使っている（グローバルエンドポイントを使っていない）
 - [ ] 運営者の資格情報（`gcloud auth application-default login`）を設定した
-- [ ] `grant-admin` で `admin` クレームを自分に付与した（実装後）
-- [ ] `config/operations` と `config/embedding` の初期ドキュメントがある。`ops stop ai` で AI を止められることを確認した（実装後）
+- [ ] `grant-admin` で `admin` クレームを自分に付与した
+- [ ] `config/operations` と `config/embedding` の初期ドキュメントがある。`ops stop ai` で AI を止められることを確認した
 - [ ] コスト見積もり（手順14）を済ませ、日次上限を決めた
 - [ ] Cloud Run の `minScale` が 0、`max-instances` が設定済み
 - [ ] Scheduler が毎日 03:00 JST に登録されている
