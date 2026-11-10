@@ -15,7 +15,7 @@
     "@firebase/auth": "1.13.9",
     "@hachioji-gov/shared": "*",
     "motion": "11.18.2",
-    "react": "18.3.1",
+    "react": "19.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "7.18.5",
     "workbox-core": "7.4.1",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
-    "@types/react": "18.3.31",
+    "@types/react": "19.3.0",
     "@types/react-dom": "18.3.7",
     "@vitejs/plugin-react": "4.7.0",
     "playwright-core": "1.64.1",
