@@ -33,3 +33,21 @@ Thumbs.db
 # Playwright（packages/web の E2E）
 test-results/
 playwright-report/
+
+# 提出用リポジトリのテンプレートにあった項目
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+*.p12
+credentials*.json
+google-services.json
+GoogleService-Info.plist
+out/
+.next/
+.wrangler/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vscode/*
+!.vscode/extensions.json
