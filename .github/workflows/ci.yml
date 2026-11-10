@@ -63,6 +63,25 @@ jobs:
       - name: Unit and property tests
         run: npm test
 
+  # 画面の E2E とアクセシビリティ（タスク 26.1）。必須チェックではない
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: E2E and accessibility tests
+        run: npm run test:e2e -w @hachioji-gov/web
+
   integration-security:
     name: integration-security
     runs-on: ubuntu-latest

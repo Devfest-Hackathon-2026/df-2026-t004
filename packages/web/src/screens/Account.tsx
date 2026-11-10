@@ -70,9 +70,14 @@ export function MyHome() {
       <main className="main">
         {household && (
           <section className="card" aria-labelledby="h-house">
-            <h2 id="h-house" className="h2">
-              世帯の情報
-            </h2>
+            <div className="between">
+              <h2 id="h-house" className="h2">
+                世帯の情報
+              </h2>
+              <Link to="/my/household" className="btn ghost">
+                編集
+              </Link>
+            </div>
             <dl
               style={{
                 margin: 0,
@@ -687,6 +692,11 @@ export function ExpenseForm() {
           {err("subjectId") && <p className="err">{err("subjectId")}</p>}
         </fieldset>
         <p className="notice gray">領収書の写真の読み取りは、今後対応する予定です</p>
+        {err("form") && (
+          <p role="alert" className="err">
+            {err("form")}
+          </p>
+        )}
         {failure && (
           <p role="alert" className="err">
             {failure}
