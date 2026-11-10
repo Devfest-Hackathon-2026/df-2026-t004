@@ -287,6 +287,11 @@ export function Chat() {
                             ))}
                           </m.div>
                         )}
+                        {t.answer.status === "verified" && (
+                          <p className="small sub">
+                            利用できるかどうかの最終的な確認は、各制度の窓口で行ってください。
+                          </p>
+                        )}
                         {t.answer.status === "verified" && t.answer.proposal && (
                           <button
                             type="button"

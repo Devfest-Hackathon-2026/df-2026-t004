@@ -118,6 +118,29 @@ describe("splitClaims / buildGroundingInputs / aggregateGrounding (Property 28)"
     ]);
     expect(aggregateGrounding([]).passed).toBe(false);
   });
+
+  it("括弧の中の句点では文を分けない（括弧の後の引用が文全体に付く）", () => {
+    const text = "対象は産後1年以内の母子です（入院中の方を除きます。死産の方も利用できます）[5]。";
+    expect(splitClaims(text)).toEqual([
+      {
+        text: "対象は産後1年以内の母子です（入院中の方を除きます。死産の方も利用できます）[5]",
+        citations: [5],
+      },
+    ]);
+  });
+
+  it("引用のない結びの「窓口で確認してください」は主張にしない。数字を含むものは残す", () => {
+    const text = [
+      "月1万円です[1]。",
+      "なお、実際に利用できるかどうかは、最終的に窓口でご確認ください。",
+      "お住まいの市町村の担当窓口で最終的な確認を行ってください。",
+      "窓口（042-000-0000）で確認してください。",
+    ].join("\n");
+    expect(splitClaims(text)).toEqual([
+      { text: "月1万円です[1]", citations: [1] },
+      { text: "窓口（042-000-0000）で確認してください", citations: [] },
+    ]);
+  });
 });
 
 // Feature: childcare-medical-welfare-navi, Property 27: 再生成は合計1回までで、失敗時は fallback になる
