@@ -81,15 +81,43 @@ export function authenticate(verifier: IdTokenVerifier): MiddlewareHandler<AppEn
   return async (c, next) => {
     const bearer = bearerToken(c.req.header("Authorization"));
     let uid: string | undefined;
+    let authTime: number | undefined;
     if (bearer !== undefined) {
       try {
-        uid = (await verifier.verifyIdToken(bearer)).uid;
+        const decoded = await verifier.verifyIdToken(bearer);
+        uid = decoded.uid;
+        authTime = decoded.auth_time;
       } catch {
         uid = undefined;
       }
     }
     if (uid === undefined || uid.length === 0) return c.json({ error: "unauthenticated" }, 401);
     c.set("uid", uid);
+    if (authTime !== undefined) c.set("authTime", authTime);
+    await next();
+  };
+}
+
+/** 元に戻せない操作の前に求める、ログイン（再認証）からの経過時間の上限（秒） */
+export const RECENT_SIGN_IN_SEC = 5 * 60;
+// 端末と Firebase の時計のずれを許す幅（秒）
+const CLOCK_SKEW_SEC = 60;
+
+/**
+ * 直前にログイン（再認証）したトークンだけを通す。authenticate の後に置く（#106）。
+ * トークンが盗まれても、元に戻せないアカウント削除を実行されにくくするため。
+ * auth_time が無い・古い・未来すぎるときは 401 reauthentication_required。
+ */
+export function requireRecentSignIn(
+  now: Now,
+  maxAgeSec = RECENT_SIGN_IN_SEC,
+): MiddlewareHandler<AppEnv> {
+  return async (c, next) => {
+    const authTime = c.get("authTime");
+    const age = now() / 1000 - (authTime ?? Number.NEGATIVE_INFINITY);
+    if (!(age <= maxAgeSec && age >= -CLOCK_SKEW_SEC)) {
+      return c.json({ error: "reauthentication_required" }, 401);
+    }
     await next();
   };
 }

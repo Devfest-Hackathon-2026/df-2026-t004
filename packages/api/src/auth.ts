@@ -4,12 +4,15 @@ import type { MiddlewareHandler } from "hono";
 
 /** ID トークンの検証（本番は Firebase Admin SDK、テストは差し替え） */
 export interface IdTokenVerifier {
-  verifyIdToken(idToken: string): Promise<{ uid: string }>;
+  /** auth_time は最後にログイン（再認証）した時刻（UNIX 秒）。Admin SDK の戻り値に入っている */
+  verifyIdToken(idToken: string): Promise<{ uid: string; auth_time?: number }>;
 }
 
 export type AuthVariables = {
   /** 検証済みのトークンの uid */
   uid: string;
+  /** 検証済みのトークンの auth_time（UNIX 秒）。無いトークンもある */
+  authTime?: number;
 };
 
 const BEARER_PREFIX = "Bearer ";

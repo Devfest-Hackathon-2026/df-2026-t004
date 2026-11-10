@@ -11,6 +11,7 @@ import {
   rateLimitByUser,
   rejectDeletingAccount,
   rejectMultipart,
+  requireRecentSignIn,
   type AccountStatus,
   type Now,
 } from "./middleware.js";
@@ -30,6 +31,8 @@ export type Guards = {
   signedIn: MiddlewareHandler<AppEnv>[];
   // パスの :uid が本人のときだけ通す
   owner: MiddlewareHandler<AppEnv>[];
+  // 直前に再認証したときだけ通す（元に戻せない操作の前に。signedIn の後に付ける）
+  recentSignIn: MiddlewareHandler<AppEnv>;
 };
 
 export type Api = { app: Hono<AppEnv>; guards: Guards };
@@ -63,5 +66,12 @@ export function createApi(deps: ApiDeps): Api {
     ...(deps.accountStatus === undefined ? [] : [rejectDeletingAccount(deps.accountStatus)]),
     rateLimitByUser(byUser, now),
   ];
-  return { app, guards: { signedIn, owner: [...signedIn, authorizeOwner()] } };
+  return {
+    app,
+    guards: {
+      signedIn,
+      owner: [...signedIn, authorizeOwner()],
+      recentSignIn: requireRecentSignIn(now),
+    },
+  };
 }
