@@ -25,7 +25,12 @@
     "secret-scan": "gitleaks git --config .gitleaks.toml --redact --verbose --log-opts=\"--full-history HEAD\" .",
     "secret-scan:staged": "gitleaks git --config .gitleaks.toml --redact --staged --verbose .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "deploy:build:api": "gcloud builds submit --config=deploy/cloudbuild.yaml --substitutions=_TARGET=api .",
+    "deploy:build:collector": "gcloud builds submit --config=deploy/cloudbuild.yaml --substitutions=_TARGET=collector .",
+    "deploy:api": "gcloud run deploy hachioji-gov-api --image=asia-northeast1-docker.pkg.dev/$(gcloud config get-value project)/hachioji-gov/api:latest --region=asia-northeast1 --set-env-vars=GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project) --service-account=${SA_API:?SA_API を設定してください} --min-instances=0 --max-instances=3 --memory=512Mi --timeout=300 --allow-unauthenticated",
+    "deploy:collector": "gcloud run jobs deploy hachioji-gov-collector --image=asia-northeast1-docker.pkg.dev/$(gcloud config get-value project)/hachioji-gov/collector:latest --region=asia-northeast1 --set-env-vars=GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project) --service-account=${SA_COLLECTOR:?SA_COLLECTOR を設定してください} --memory=1Gi --task-timeout=900 --max-retries=1",
+    "deploy:web": "npm run build -w @hachioji-gov/web && firebase deploy --only hosting"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
