@@ -39,7 +39,16 @@
         ]
       },
       {
-        "source": "**/!(*.*)",
+        "source": "/!(api|*.*)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/!(api)/**/!(*.*)",
         "headers": [
           {
             "key": "Cache-Control",
