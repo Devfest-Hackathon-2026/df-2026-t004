@@ -39,7 +39,7 @@
         ]
       },
       {
-        "source": "/!(api|*.*)",
+        "source": "/!(*.*)",
         "headers": [
           {
             "key": "Cache-Control",
