@@ -3,7 +3,7 @@
   "ai": {
     "generationModel": "gemini-3.5-flash",
     "judgeModel": "gemini-3.5-flash",
-    "intentModel": "gemini-2.5-flash",
+    "intentModel": "gemini-3.5-flash",
     "location": "asia-northeast1",
     "maxOutputTokens": 1024
   },
