@@ -465,7 +465,8 @@ export function mountHousehold(api: Api, deps: HouseholdDeps): void {
     );
   });
 
-  app.delete("/account", async (c) => {
+  // 元に戻せないので、直前に再認証したトークンだけを受け付ける（#106）
+  app.delete("/account", guards.recentSignIn, async (c) => {
     const result = await deps.deleter.run(c.get("uid"));
     // 失敗したときはサインインを保ち、同じリクエストで再試行してもらう
     return result.state === "done"

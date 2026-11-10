@@ -11,6 +11,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Dialog, Header, Icon, easeOut, useToast } from "../components/ui";
+import { reauthErrorMessage } from "../lib/authErrors";
 import type { ExpenseOverview } from "../services/accountApi";
 import type { Household } from "../services/householdApi";
 import { toMatchHousehold } from "../state/household";
@@ -34,6 +35,15 @@ export function MyHome() {
   const { toast, show } = useToast();
   const [withdraw, setWithdraw] = useState<"closed" | "confirm" | "busy" | "failed">("closed");
   const [del, setDel] = useState<"closed" | "confirm" | "busy" | "failed">("closed");
+  // 削除の前の再認証（#106）。パスワードの人は入力してもらい、Google の人はポップアップ
+  const [password, setPassword] = useState("");
+  const [reauthErr, setReauthErr] = useState<string | null>(null);
+  const reauthMethod = del === "closed" ? null : auth.reauthMethod();
+  const openDelete = () => {
+    setPassword("");
+    setReauthErr(null);
+    setDel("confirm");
+  };
 
   const doWithdraw = async () => {
     setWithdraw("busy");
@@ -50,7 +60,18 @@ export function MyHome() {
   };
 
   const doDelete = async () => {
+    const before = del;
     setDel("busy");
+    setReauthErr(null);
+    try {
+      await auth.reauthenticate(reauthMethod === "password" ? password : undefined);
+    } catch (error) {
+      const code: unknown =
+        error !== null && typeof error === "object" ? Reflect.get(error, "code") : undefined;
+      setReauthErr(reauthErrorMessage(typeof code === "string" ? code : ""));
+      setDel(before === "failed" ? "failed" : "confirm");
+      return;
+    }
     try {
       await account.deleteAccount();
       nav("/deleted", { replace: true });
@@ -156,7 +177,7 @@ export function MyHome() {
           <button type="button" onClick={() => void auth.signOut()}>
             ログアウト
           </button>
-          <button type="button" className="danger" onClick={() => setDel("confirm")}>
+          <button type="button" className="danger" onClick={openDelete}>
             アカウントを削除
           </button>
         </nav>
@@ -214,6 +235,34 @@ export function MyHome() {
             <li>ログイン用のアカウント</li>
           </ul>
         </div>
+        <div className="field">
+          {reauthMethod === "password" ? (
+            <>
+              <label htmlFor="del-pw">確認のため、パスワードを入れてください</label>
+              <input
+                id="del-pw"
+                className="input"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                disabled={del === "busy"}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setReauthErr(null);
+                }}
+                aria-invalid={!!reauthErr}
+                aria-describedby={reauthErr ? "del-reauth-err" : undefined}
+              />
+            </>
+          ) : (
+            <p className="note">削除する前に、Google でもう一度ログインします。</p>
+          )}
+          {reauthErr && (
+            <p id="del-reauth-err" role="alert" className="err">
+              {reauthErr}
+            </p>
+          )}
+        </div>
         <AnimatePresence>
           {del === "failed" && (
             <m.p
@@ -231,7 +280,7 @@ export function MyHome() {
           <button
             type="button"
             className="btn lg danger block"
-            disabled={del === "busy"}
+            disabled={del === "busy" || (reauthMethod === "password" && password === "")}
             onClick={() => void doDelete()}
           >
             {del === "busy"

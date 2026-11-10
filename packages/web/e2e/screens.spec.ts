@@ -147,6 +147,21 @@ test.describe("ログイン後", () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test("アカウント削除は、パスワードで再認証してから行う（#106）", async ({ page }) => {
+    await openTab(page, "マイホーム");
+    await page.getByRole("button", { name: "アカウントを削除" }).click();
+    const dialog = page.getByRole("alertdialog");
+    const remove = dialog.getByRole("button", { name: "削除する", exact: true });
+    await expect(remove).toBeDisabled();
+    await dialog.getByLabel(/パスワード/).fill("wrong-password");
+    await remove.click();
+    await expect(dialog.getByRole("alert")).toHaveText("パスワードが正しくありません");
+    await expect(page).toHaveURL(/\/my$/);
+    await dialog.getByLabel(/パスワード/).fill("e2e-password-1234");
+    await remove.click();
+    await expect(page).toHaveURL(/\/deleted$/);
+  });
+
   test("オフラインになると、その旨を表示する（Requirement 12.5, 12.6）", async ({
     page,
     context,

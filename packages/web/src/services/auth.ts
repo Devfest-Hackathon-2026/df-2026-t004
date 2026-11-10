@@ -3,11 +3,14 @@
 
 import { initializeApp } from "@firebase/app";
 import {
+  EmailAuthProvider,
   GoogleAuthProvider,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as fbSignOut,
@@ -16,6 +19,9 @@ import { withTimeout } from "../lib/authErrors";
 import type { AppEnv } from "../lib/env";
 
 export type AuthUser = { readonly uid: string; readonly email: string | null };
+
+/** 再認証の方法。パスワードで登録した人はパスワード、Google の人はポップアップ */
+export type ReauthMethod = "password" | "google";
 
 export interface AuthService {
   readonly kind: "firebase" | "mock";
@@ -26,6 +32,13 @@ export interface AuthService {
   signOut(): Promise<void>;
   /** API の Authorization ヘッダーに付ける ID トークン */
   idToken(): Promise<string | null>;
+  /** 今のユーザーの再認証の方法（ログインしていなければ null） */
+  reauthMethod(): ReauthMethod | null;
+  /**
+   * 元に戻せない操作（アカウント削除）の前に再認証する（#106）。
+   * 成功すると ID トークンの auth_time が新しくなる。password は reauthMethod が "password" のとき使う
+   */
+  reauthenticate(password?: string): Promise<void>;
 }
 
 export function createFirebaseAuth(env: AppEnv): AuthService {
@@ -49,6 +62,22 @@ export function createFirebaseAuth(env: AppEnv): AuthService {
       toUser((await signInWithPopup(auth, new GoogleAuthProvider())).user),
     signOut: () => fbSignOut(auth),
     idToken: async () => (auth.currentUser ? auth.currentUser.getIdToken() : null),
+    reauthMethod: () => {
+      const u = auth.currentUser;
+      if (!u) return null;
+      return u.providerData.some((p) => p.providerId === "password") ? "password" : "google";
+    },
+    reauthenticate: async (password) => {
+      const u = auth.currentUser;
+      if (!u) throw Object.assign(new Error("no user"), { code: "auth/no-current-user" });
+      if (u.providerData.some((p) => p.providerId === "password")) {
+        const credential = EmailAuthProvider.credential(u.email ?? "", password ?? "");
+        await withTimeout(reauthenticateWithCredential(u, credential));
+      } else {
+        await reauthenticateWithPopup(u, new GoogleAuthProvider());
+      }
+      // 再認証の応答で SDK が ID トークンを置き換えるので、次の getIdToken は auth_time が新しい
+    },
   };
 }
 
@@ -59,10 +88,12 @@ export function createFirebaseAuth(env: AppEnv): AuthService {
  */
 export function createMockAuth(): AuthService {
   let user: AuthUser | null = null;
+  let method: ReauthMethod | null = null;
   const accounts = new Map<string, string>();
   const listeners = new Set<(u: AuthUser | null) => void>();
-  const set = (u: AuthUser | null) => {
+  const set = (u: AuthUser | null, m: ReauthMethod | null = "password") => {
     user = u;
+    method = u ? m : null;
     listeners.forEach((l) => l(u));
   };
   const fail = (code: string) => Promise.reject(Object.assign(new Error(code), { code }));
@@ -94,7 +125,7 @@ export function createMockAuth(): AuthService {
     async signInWithGoogle() {
       await wait();
       const u = { uid: "mock-google", email: "google-user@example.com" };
-      set(u);
+      set(u, "google");
       return u;
     },
     async signOut() {
@@ -102,6 +133,16 @@ export function createMockAuth(): AuthService {
     },
     async idToken() {
       return user ? `mock-token-${user.uid}` : null;
+    },
+    reauthMethod: () => method,
+    async reauthenticate(password) {
+      await wait();
+      if (!user) return fail("auth/no-current-user");
+      if (method !== "password") return;
+      const saved = user.email === null ? undefined : accounts.get(user.email);
+      if (!password || (saved !== undefined && saved !== password)) {
+        return fail("auth/invalid-credential");
+      }
     },
   };
 }

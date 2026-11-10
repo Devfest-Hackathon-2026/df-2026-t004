@@ -1,7 +1,13 @@
 // 共通ミドルウェアの単体テスト（Requirement 1.9, 1.10, 9.5〜9.7, 15.3）
 import { createLogger, scanLogForLeaks } from "@hachioji-gov/shared";
 import { describe, expect, it } from "vitest";
-import { clientIp, createApi, UNKNOWN_IP, type IdTokenVerifier } from "../src/index.js";
+import {
+  clientIp,
+  createApi,
+  RECENT_SIGN_IN_SEC,
+  UNKNOWN_IP,
+  type IdTokenVerifier,
+} from "../src/index.js";
 import { CANARIES, CANARY_QUESTION } from "./support/canaries.js";
 
 // "token-<uid>" を uid に対応づける偽の検証器。検証した回数を数える
@@ -211,5 +217,46 @@ describe("clientIp", () => {
     expect(await ipOf()).toBe(UNKNOWN_IP);
     expect(await ipOf(" , ")).toBe(UNKNOWN_IP);
     expect(await ipOf("x".repeat(65))).toBe(UNKNOWN_IP);
+  });
+});
+
+describe("requireRecentSignIn（アカウント削除の前の再認証、#106）", () => {
+  // "fresh-<秒前>" は、その秒数だけ前にログインしたトークン。"noauth" は auth_time が無いトークン
+  const verifier: IdTokenVerifier = {
+    verifyIdToken: async (token) => {
+      if (!token.startsWith("fresh-")) return { uid: "u1" };
+      const ago = Number(token.slice("fresh-".length));
+      return { uid: "u1", auth_time: Math.floor(BASE / 1000) - ago };
+    },
+  };
+  const { app, guards } = createApi({
+    config: {
+      rateLimit: { perUserPerMinute: 100, perIpPerMinute: 100, windowSec: 60, maxEntries: 9 },
+    },
+    verifier,
+    logger: createLogger({ sink: () => {} }),
+    now: () => BASE,
+  });
+  app.use("/danger", ...guards.signedIn);
+  app.delete("/danger", guards.recentSignIn, (c) => c.json({ ok: true }));
+  const del = async (token: string) => {
+    const res = await app.request("/danger", {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return { status: res.status, body: (await res.json()) as unknown };
+  };
+
+  it("直前（5分以内）に再認証したトークンなら通す", async () => {
+    expect(await del("fresh-0")).toEqual({ status: 200, body: { ok: true } });
+    expect((await del(`fresh-${RECENT_SIGN_IN_SEC}`)).status).toBe(200);
+  });
+
+  it("古い・auth_time が無い・未来すぎるトークンは 401 reauthentication_required", async () => {
+    const stale = { status: 401, body: { error: "reauthentication_required" } };
+    expect(await del(`fresh-${RECENT_SIGN_IN_SEC + 1}`)).toEqual(stale);
+    expect(await del("fresh-86400")).toEqual(stale);
+    expect(await del("noauth")).toEqual(stale);
+    expect(await del("fresh--600")).toEqual(stale);
   });
 });
