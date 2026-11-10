@@ -1,0 +1,35 @@
+# API（Cloud Run）と収集ジョブ（Cloud Run Job）の共通イメージ（Requirement 9.10, 13.1）
+# モノレポのため、リポジトリ直下をビルドコンテキストにする。
+#   gcloud builds submit --config=deploy/cloudbuild.yaml --substitutions=_TARGET=api .
+# - TypeScript のソースを tsx で直接動かす（tsx は api・collector の dependencies。各パッケージはビルド成果物を持たない）
+# - 本番の依存だけを入れ、非 root ユーザーで実行する
+# - シークレットはイメージに含めない（.dockerignore で .env などを除く。必要なら Secret Manager から環境変数で渡す）
+ARG NODE_IMAGE=node:22-slim
+
+FROM ${NODE_IMAGE} AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY packages/api/package.json packages/api/
+COPY packages/collector/package.json packages/collector/
+COPY packages/admin/package.json packages/admin/
+COPY packages/eval/package.json packages/eval/
+COPY packages/web/package.json packages/web/
+ARG TARGET
+RUN test -n "$TARGET" \
+ && npm ci --omit=dev --ignore-scripts --no-audit --no-fund \
+      --workspace=@hachioji-gov/shared --workspace="@hachioji-gov/${TARGET}" \
+ && npm cache clean --force
+
+FROM ${NODE_IMAGE}
+ARG TARGET
+ENV NODE_ENV=production TARGET=${TARGET}
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+COPY config ./config
+COPY packages/shared ./packages/shared
+COPY packages/${TARGET} ./packages/${TARGET}
+USER node
+# Cloud Run は PORT を渡す（API は既定 8080）
+CMD ["sh", "-c", "exec node --import tsx packages/${TARGET}/src/main.ts"]

@@ -1,0 +1,20 @@
+# Cloud Build でイメージを作り、Artifact Registry に置く（Requirement 13.1）
+# 使い方（リポジトリ直下で）:
+#   gcloud builds submit --config=deploy/cloudbuild.yaml --substitutions=_TARGET=api .
+#   gcloud builds submit --config=deploy/cloudbuild.yaml --substitutions=_TARGET=collector .
+substitutions:
+  _TARGET: api
+  _REGION: asia-northeast1
+  _REPO: hachioji-gov
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_TARGET}:latest
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file=deploy/Dockerfile.node
+      - --build-arg=TARGET=${_TARGET}
+      - --tag=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_TARGET}:latest
+      - .
+options:
+  logging: CLOUD_LOGGING_ONLY

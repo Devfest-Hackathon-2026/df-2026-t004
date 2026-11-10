@@ -1,0 +1,21 @@
+# イメージに入れないもの（シークレット・依存・成果物・テスト）
+**/node_modules
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+.git
+.github
+.kiro
+docs
+logs
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+**/service-account*.json
+**/*-credentials.json
+.firebase
+.claude
