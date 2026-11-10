@@ -7,7 +7,7 @@ import { serve } from "@hono/node-server";
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import { createLogger, loadConfig, SAMPLE_POSTAL_TABLE } from "@hachioji-gov/shared";
+import { createLogger, loadConfig } from "@hachioji-gov/shared";
 import {
   FirestoreChatStore,
   FirestoreChatVectorStore,
@@ -24,6 +24,7 @@ import {
 } from "./household.js";
 import { FirestoreProgramStore, FirestoreUserRecords, mountDashboard } from "./dashboard.js";
 import { mountHealth } from "./health.js";
+import { loadPostalTable } from "./postal-data.js";
 import { withApiPrefix } from "./prefix.js";
 import { createApi } from "./server.js";
 
@@ -100,8 +101,8 @@ async function main(): Promise<void> {
         }
       },
     }),
-    // 全国の郵便番号データは未投入。投入までは開発用の小さな表を使う
-    postal: SAMPLE_POSTAL_TABLE,
+    // 全国の郵便番号（日本郵便の郵便番号データ）
+    postal: await loadPostalTable(),
     now: () => new Date(),
   });
   mountDashboard(api, {
