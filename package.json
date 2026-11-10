@@ -22,6 +22,7 @@
     "admin": "tsx packages/admin/src/main.ts",
     "gen-indexes": "tsx scripts/gen-indexes.ts",
     "verify-indexes": "tsx scripts/verify-indexes.ts",
+    "probe-vector-search": "tsx scripts/probe-vector-search.ts",
     "secret-scan": "gitleaks git --config .gitleaks.toml --redact --verbose --log-opts=\"--full-history HEAD\" .",
     "secret-scan:staged": "gitleaks git --config .gitleaks.toml --redact --staged --verbose .",
     "format": "prettier --write .",
