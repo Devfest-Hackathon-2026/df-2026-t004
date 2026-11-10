@@ -194,6 +194,19 @@ describe("clientIp", () => {
     expect(await ipOf("203.0.113.7")).toBe("203.0.113.7");
   });
 
+  it("Hosting 経由（最後が中継サーバー）なら1つ前を使う（#129、U-8）", async () => {
+    expect(await ipOf("35.201.207.169,66.249.82.200")).toBe("35.201.207.169");
+    expect(await ipOf("203.0.113.9,35.201.207.169")).toBe("35.201.207.169");
+    expect(await ipOf("203.0.113.9,35.201.207.169,66.249.82.38")).toBe("35.201.207.169");
+    // 中継サーバーの範囲（66.249.64.0/19）の端と、その外
+    expect(await ipOf("35.201.207.169,66.249.64.0")).toBe("35.201.207.169");
+    expect(await ipOf("35.201.207.169,66.249.95.255")).toBe("35.201.207.169");
+    expect(await ipOf("35.201.207.169,66.249.96.1")).toBe("66.249.96.1");
+    expect(await ipOf("35.201.207.169,66.249.63.255")).toBe("66.249.63.255");
+    // 中継サーバーしか無ければ、その値のまま
+    expect(await ipOf("66.249.82.200")).toBe("66.249.82.200");
+  });
+
   it("無い・空・長すぎるときは unknown", async () => {
     expect(await ipOf()).toBe(UNKNOWN_IP);
     expect(await ipOf(" , ")).toBe(UNKNOWN_IP);
