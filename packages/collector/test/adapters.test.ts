@@ -1,5 +1,7 @@
+import { ThinkingLevel } from "@google/genai";
 import { describe, expect, it } from "vitest";
 import {
+  EXTRACT_MAX_OUTPUT_TOKENS,
   HttpFetcher,
   USER_AGENT,
   VertexEmbedder,
@@ -140,9 +142,18 @@ describe("VertexExtractor", () => {
     expect(params[0]).toMatchObject({
       model: "gemini-x",
       contents: "<資料>\n本文\n</資料>",
-      config: { responseMimeType: "application/json", temperature: 0, maxOutputTokens: 1024 },
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0,
+        maxOutputTokens: 1024,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+      },
     });
     expect(params[0]?.config.systemInstruction).toContain("推測");
+  });
+
+  it("抽出の出力上限は、思考の分を見込んでチャットの上限（1024）より大きい", () => {
+    expect(EXTRACT_MAX_OUTPUT_TOKENS).toBeGreaterThan(1024);
   });
 
   it("応答が無い・JSON でないときは null（すべての項目が空になる）", async () => {

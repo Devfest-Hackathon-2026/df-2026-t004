@@ -8,7 +8,12 @@ import { createLogger, loadConfig } from "@hachioji-gov/shared";
 import { HttpFetcher } from "./fetcher.js";
 import { FirestoreCollectorStore, FirestoreOpsConfigStore } from "./firestore.js";
 import { runCollection } from "./run.js";
-import { createGenAiModels, VertexEmbedder, VertexExtractor } from "./vertex.js";
+import {
+  createGenAiModels,
+  EXTRACT_MAX_OUTPUT_TOKENS,
+  VertexEmbedder,
+  VertexExtractor,
+} from "./vertex.js";
 
 const logger = createLogger();
 
@@ -35,7 +40,7 @@ async function main(): Promise<number> {
       store: new FirestoreCollectorStore(db, { fieldPrefix: config.embedding.fieldPrefix }),
       fetcher: new HttpFetcher(),
       embedder: new VertexEmbedder(models),
-      extractor: new VertexExtractor(models, config.ai.intentModel, config.ai.maxOutputTokens),
+      extractor: new VertexExtractor(models, config.ai.intentModel, EXTRACT_MAX_OUTPUT_TOKENS),
       clock: { now: () => new Date() },
       ops: new FirestoreOpsConfigStore(db),
     },
