@@ -23,6 +23,7 @@ import {
   mountHousehold,
 } from "./household.js";
 import { FirestoreProgramStore, FirestoreUserRecords, mountDashboard } from "./dashboard.js";
+import { withApiPrefix } from "./prefix.js";
 import { createApi } from "./server.js";
 
 const logger = createLogger();
@@ -110,7 +111,8 @@ async function main(): Promise<void> {
   });
   api.app.get("/healthz", (c) => c.json({ ok: true }));
   const port = Number(process.env["PORT"] ?? "8080");
-  serve({ fetch: api.app.fetch, port });
+  // Hosting の rewrites から届く /api/** も受け付ける（#112）
+  serve({ fetch: withApiPrefix(api.app.fetch), port });
   logger.info("api.started");
 }
 
