@@ -9,11 +9,15 @@ import {
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import {
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   setDoc,
   updateDoc,
+  where,
   type DocumentData,
   type Firestore,
 } from "firebase/firestore";
@@ -242,5 +246,123 @@ describe("programs", () => {
   it("認証済みでも書き込めない", async () => {
     await assertFails(setDoc(doc(db(contextFor("owner")), "programs/p1"), { name: "改ざん" }));
     expect(await snapshot("programs/p1")).toEqual({ name: "制度" });
+  });
+});
+
+// 確認状態と検索対象のフラグはクライアントから変えられない（Requirement 3.16, 9.6, 9.7, 15.2）
+describe("確認状態・検索対象・設定は、クライアントから書き込めない", () => {
+  const writers: Actor[] = ["owner", "other", "unauthenticated"];
+
+  describe("programs の verified* と needsReview", () => {
+    const program = {
+      name: "児童手当",
+      municipalityCode: "13201",
+      status: "active",
+      verified: false,
+      needsReview: true,
+      contentHash: "h2",
+      verifiedContentHash: "h1",
+      verifiedAt: "2026-04-01",
+      verifiedBy: "operator-uid",
+    };
+    const changes: [string, DocumentData][] = [
+      ["verified", { verified: true }],
+      ["verifiedAt", { verifiedAt: "2026-11-10" }],
+      ["verifiedBy", { verifiedBy: OWNER }],
+      ["verifiedContentHash", { verifiedContentHash: "h2" }],
+      ["needsReview", { needsReview: false }],
+      ["確認一式", { verified: true, needsReview: false, verifiedContentHash: "h2" }],
+    ];
+
+    beforeEach(async () => {
+      await seed("programs/p1", program);
+    });
+
+    describe.each(writers)("%s", (actor) => {
+      it.each(changes)("%s の更新は拒否され、データは変わらない", async (_name, change) => {
+        await assertFails(updateDoc(doc(db(contextFor(actor)), "programs/p1"), change));
+        expect(await snapshot("programs/p1")).toEqual(program);
+      });
+
+      it("確認済みとして新しい制度を作れない", async () => {
+        await assertFails(
+          setDoc(doc(db(contextFor(actor)), "programs/p2"), {
+            ...program,
+            verified: true,
+            needsReview: false,
+          }),
+        );
+        expect(await snapshot("programs/p2")).toBeUndefined();
+      });
+
+      it("削除もできない", async () => {
+        await assertFails(deleteDoc(doc(db(contextFor(actor)), "programs/p1")));
+        expect(await snapshot("programs/p1")).toEqual(program);
+      });
+    });
+  });
+
+  describe("chunks.searchable", () => {
+    const chunk = {
+      programId: "p1",
+      sourceId: "s1",
+      municipalityCode: "13201",
+      category: "childcare",
+      excerpt: "抜粋",
+      searchable: false,
+      band_age_0_2: true,
+    };
+
+    beforeEach(async () => {
+      await seed("chunks/k1", chunk);
+    });
+
+    describe.each(writers)("%s", (actor) => {
+      it("searchable を true にできず、データは変わらない", async () => {
+        await assertFails(updateDoc(doc(db(contextFor(actor)), "chunks/k1"), { searchable: true }));
+        expect(await snapshot("chunks/k1")).toEqual(chunk);
+      });
+
+      it("検索対象のチャンクを新しく作れない", async () => {
+        await assertFails(
+          setDoc(doc(db(contextFor(actor)), "chunks/k2"), { ...chunk, searchable: true }),
+        );
+        expect(await snapshot("chunks/k2")).toBeUndefined();
+      });
+
+      it("読み取り・検索もできない", async () => {
+        const f = db(contextFor(actor));
+        await assertFails(getDoc(doc(f, "chunks/k1")));
+        await assertFails(getDocs(query(collection(f, "chunks"), where("searchable", "==", true))));
+      });
+    });
+  });
+
+  describe("config/*", () => {
+    const docs: [string, DocumentData][] = [
+      ["config/operations", { chat: "running", collection: "running" }],
+      ["config/embedding", { searchVersion: "v1" }],
+      ["config/anything", { value: 1 }],
+    ];
+
+    beforeEach(async () => {
+      for (const [path, data] of docs) await seed(path, data);
+    });
+
+    describe.each(writers)("%s", (actor) => {
+      it.each(docs)("%s は読み書き・削除できず、データは変わらない", async (path, data) => {
+        const f = db(contextFor(actor));
+        await assertFails(getDoc(doc(f, path)));
+        await assertFails(updateDoc(doc(f, path), { changed: true }));
+        await assertFails(setDoc(doc(f, path), { searchVersion: "v2", chat: "stopped" }));
+        await assertFails(deleteDoc(doc(f, path)));
+        expect(await snapshot(path)).toEqual(data);
+      });
+
+      it("新しい設定ドキュメントを作れない", async () => {
+        await assertFails(setDoc(doc(db(contextFor(actor)), "config/new"), { value: 1 }));
+        expect(await snapshot("config/new")).toBeUndefined();
+      });
+    });
   });
 });
