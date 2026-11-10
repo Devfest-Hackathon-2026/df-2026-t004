@@ -285,20 +285,20 @@
   - すべてのテストと CI の必須チェックが成功することを確認する。問題があればユーザーに確認する
 ### フェーズ2: Firestore のルールとインデックス、収集、運営操作
 
-- [ ] 12. Security Rules とインデックスの生成・検証を作る
+- [x] 12. Security Rules とインデックスの生成・検証を作る
   - ブランチ: `feat/firestore-rules-and-indexes` ／ type: `feat`（scope `infra`）／ PR タイトル例: `feat(infra): generate vector indexes and finalize rules`
   - _Requirements: 3.10, 4.7, 5.1, 9.6, 9.7, 13.13, 13.14, 15.2_
-  - [ ] 12.1 `scripts/gen-indexes.ts` を作る
+  - [x] 12.1 `scripts/gen-indexes.ts` を作る
     - `config/app.config.json`（`embedding.fieldPrefix`、`dimensions`、`version`）から、1つの埋め込み版あたり17本の複合ベクトルインデックスを `firebase/firestore.indexes.json` に生成する。TTL などのフィールド設定も含める
     - CI の `index-consistency` を、再生成した結果とコミット済みファイルの差分検査に切り替える
     - _Requirements: 4.7, 5.1, 13.13_
-  - [ ] 12.2 `scripts/verify-indexes.ts` を作る
+  - [x] 12.2 `scripts/verify-indexes.ts` を作る
     - `gcloud firestore indexes composite list --format=json` の出力を読み、次元・本数・`READY` を検査し、不一致があれば非ゼロで終了する。出力の読み込み部分は純粋関数にしてテストする
     - _Requirements: 13.14_
-  - [ ] 12.3 Security Rules を完成させ、テストを追加する（必須）
+  - [x] 12.3 Security Rules を完成させ、テストを追加する（必須）
     - `programs` の `verified*`・`needsReview`、`chunks.searchable`、`config/*` はクライアントから書き込み不可であることを、Rules のテストに追加する
     - _Requirements: 3.16, 9.6, 9.7, 15.2_
-  - [ ] 12.4 等価条件のみのベクトル検索を Emulator で検証する
+  - [x] 12.4 等価条件のみのベクトル検索を Emulator で検証する
     - `findNearest` と等価条件の事前フィルタの組合せが Emulator で動くかを、統合テストで確認する。`in` や `array-contains` との併用可否も試し、結果を設計書の未確認事項 U-1 の確認記録として PR に書く（設計書は変更しない）。Emulator が対応していない場合は、その旨を記録し、実環境での確認を UW-GC-9 に回す
     - _Requirements: 4.7, 5.1_
 

@@ -40,10 +40,23 @@ service cloud.firestore {
       }
     }
 
-    // 制度の構造化情報: 認証済みの読み取りのみ
+    // 制度の構造化情報: 認証済みの読み取りのみ。
+    // 確認状態（verified・verifiedAt・verifiedBy・verifiedContentHash・needsReview）を含め、
+    // 書き込みは collector と admin CLI（Admin SDK）だけが行う（Requirement 3.16, 9.7）
     match /programs/{programId} {
       allow read: if request.auth != null;
       allow write: if false;
+    }
+
+    // 以下は既定の拒否と同じだが、意図を明示する（Requirement 15.2）。
+    // 根拠のチャンク（searchable・埋め込みを含む）は API の検索だけが読む
+    match /chunks/{chunkId} {
+      allow read, write: if false;
+    }
+
+    // 運営スイッチ（config/operations）と検索の版（config/embedding）など
+    match /config/{docId} {
+      allow read, write: if false;
     }
   }
 }

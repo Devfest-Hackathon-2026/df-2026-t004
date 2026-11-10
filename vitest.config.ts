@@ -6,6 +6,7 @@ export default defineConfig({
       "packages/*/src/**/*.test.ts",
       "packages/*/test/**/*.test.ts",
       "scripts/**/*.test.mjs",
+      "scripts/**/*.test.ts",
     ],
     // 統合テストは Emulator が必要なため、通常の npm test には含めない
     exclude: [
