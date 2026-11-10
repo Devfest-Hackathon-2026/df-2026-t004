@@ -17,3 +17,4 @@ export * from "./chat/firestore.js";
 export * from "./chat/vertex.js";
 export * from "./household.js";
 export * from "./dashboard.js";
+export * from "./postal-data.js";
