@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { loadConfig, type AppConfig } from "../src/index.js";
+import { CONFIG_PLACEHOLDER, loadConfig, type AppConfig } from "../src/index.js";
 
 const templatePath = new URL("../../../config/app.config.json", import.meta.url);
 
@@ -19,8 +19,16 @@ function filledTemplate(): AppConfig {
 }
 
 describe("loadConfig", () => {
-  it("雛形のままだとモデル名3つが未設定として報告される", () => {
-    const result = loadConfig(readTemplate());
+  it("コミット済みの設定は、そのまま読み込める", () => {
+    expect(loadConfig(readTemplate()).ok).toBe(true);
+  });
+
+  it("モデル名3つが雛形のままだと未設定として報告される", () => {
+    const raw = readTemplate();
+    raw.ai.generationModel = CONFIG_PLACEHOLDER;
+    raw.ai.judgeModel = CONFIG_PLACEHOLDER;
+    raw.ai.intentModel = CONFIG_PLACEHOLDER;
+    const result = loadConfig(raw);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect([...result.missingKeys].sort()).toEqual([
