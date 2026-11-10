@@ -5,7 +5,7 @@
     "judgeModel": "gemini-3.5-flash",
     "intentModel": "gemini-3.5-flash",
     "location": "asia-northeast1",
-    "maxOutputTokens": 1024
+    "maxOutputTokens": 2048
   },
   "embedding": {
     "model": "gemini-embedding-001",

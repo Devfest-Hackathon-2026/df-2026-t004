@@ -1,7 +1,7 @@
 // Vertex AI の実装（Requirement 3.3, 3.7, 13.6）
 // モデル名とリージョンは設定から読む。リージョン指定のエンドポイントを使う。
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { l2Normalize, type EmbeddingTarget } from "@hachioji-gov/shared";
 import type { Embedder, EmbeddingTask, ProgramExtractor } from "./ports.js";
 
@@ -21,9 +21,22 @@ export type GenAiModels = {
       responseJsonSchema: unknown;
       temperature: number;
       maxOutputTokens: number;
+      thinkingConfig: { thinkingLevel: ThinkingLevel };
     };
   }): Promise<{ text?: string | undefined }>;
 };
+
+/**
+ * 抽出の出力上限。思考トークンもこの上限に数えられるため、チャットの上限とは分ける。
+ * 思考を MINIMAL にしても、8項目の JSON（概要・手続き・連絡先を含む）が収まる大きさにする。
+ */
+export const EXTRACT_MAX_OUTPUT_TOKENS = 2048;
+
+/**
+ * 抽出では思考を最小にする。既定の思考のままだと、短い資料でも数百トークンを思考に使い、
+ * 出力上限に達して JSON が途中で切れる（すべての項目が null になる）。
+ */
+export const EXTRACT_THINKING_LEVEL = ThinkingLevel.MINIMAL;
 
 export function createGenAiModels(project: string, location: string): GenAiModels {
   return new GoogleGenAI({ vertexai: true, project, location }).models;
@@ -107,6 +120,7 @@ export class VertexExtractor implements ProgramExtractor {
         responseJsonSchema: PROGRAM_SCHEMA,
         temperature: 0,
         maxOutputTokens: this.maxOutputTokens,
+        thinkingConfig: { thinkingLevel: EXTRACT_THINKING_LEVEL },
       },
     });
     if (res.text === undefined) return null;

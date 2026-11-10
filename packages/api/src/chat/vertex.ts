@@ -1,7 +1,7 @@
 // チャットの Vertex AI 実装（Requirement 9.9, 10.1, 13.6, 13.10）
 // モデル名とリージョンは設定から読む。リージョン指定のエンドポイントを使う。
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { l2Normalize, type ClaimVerdict, type GroundingInput } from "@hachioji-gov/shared";
 import type { AnswerInput, ChatLlm, QueryEmbedder } from "./types.js";
 
@@ -73,6 +73,67 @@ export function intentFromResponse(text: string | undefined): "general" | "medic
   return intent === "general" ? "general" : "medical_judgment";
 }
 
+// Gemini 3 系は既定で思考し、思考トークンも maxOutputTokens に数えられる。
+// 指定しないと、短い入力でも数百トークンを思考に使い、上限に達して応答が空・途中で切れる。
+// 分類（意図判定）は思考を最小に、根拠判定と回答生成は少しだけ思考させる。
+export const THINKING_LEVELS = {
+  intent: ThinkingLevel.MINIMAL,
+  judge: ThinkingLevel.LOW,
+  answer: ThinkingLevel.LOW,
+} as const;
+
+// 思考を抑えても残る分を見込んだ上限（出力の JSON 自体は数十トークン）
+export const INTENT_MAX_OUTPUT_TOKENS = 256;
+export const JUDGE_BASE_OUTPUT_TOKENS = 1024;
+export const JUDGE_OUTPUT_TOKENS_PER_CLAIM = 16;
+
+/** 意図判定のリクエスト設定 */
+export function intentConfig() {
+  return {
+    systemInstruction: INTENT_INSTRUCTION,
+    responseMimeType: "application/json",
+    responseJsonSchema: {
+      type: "object",
+      properties: { intent: { type: "string", enum: ["general", "medical_judgment"] } },
+      required: ["intent"],
+    },
+    temperature: 0,
+    maxOutputTokens: INTENT_MAX_OUTPUT_TOKENS,
+    thinkingConfig: { thinkingLevel: THINKING_LEVELS.intent },
+  };
+}
+
+/** 回答生成のリクエスト設定（maxOutputTokens は設定ファイルの値。思考の分を含む） */
+export function answerConfig(maxOutputTokens: number) {
+  return {
+    systemInstruction: ANSWER_INSTRUCTION,
+    maxOutputTokens,
+    temperature: 0.2,
+    thinkingConfig: { thinkingLevel: THINKING_LEVELS.answer },
+  };
+}
+
+/** 根拠判定のリクエスト設定（主張の数に応じて上限を広げる） */
+export function judgeConfig(claimCount: number) {
+  return {
+    systemInstruction: JUDGE_INSTRUCTION,
+    responseMimeType: "application/json",
+    responseJsonSchema: {
+      type: "object",
+      properties: {
+        verdicts: {
+          type: "array",
+          items: { type: "string", enum: ["supported", "unsupported"] },
+        },
+      },
+      required: ["verdicts"],
+    },
+    temperature: 0,
+    maxOutputTokens: JUDGE_BASE_OUTPUT_TOKENS + claimCount * JUDGE_OUTPUT_TOKENS_PER_CLAIM,
+    thinkingConfig: { thinkingLevel: THINKING_LEVELS.judge },
+  };
+}
+
 /** Vertex AI のクライアント（初回使用時に作る。起動を軽くするため） */
 export class VertexChat implements ChatLlm, QueryEmbedder {
   private client: GoogleGenAI | null = null;
@@ -109,17 +170,7 @@ export class VertexChat implements ChatLlm, QueryEmbedder {
     const res = await this.models().generateContent({
       model: this.options.models.intent,
       contents: `<質問>\n${question}\n</質問>`,
-      config: {
-        systemInstruction: INTENT_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseJsonSchema: {
-          type: "object",
-          properties: { intent: { type: "string", enum: ["general", "medical_judgment"] } },
-          required: ["intent"],
-        },
-        temperature: 0,
-        maxOutputTokens: 64,
-      },
+      config: intentConfig(),
     });
     return intentFromResponse(res.text);
   }
@@ -128,12 +179,7 @@ export class VertexChat implements ChatLlm, QueryEmbedder {
     const stream = await this.models().generateContentStream({
       model: this.options.models.generation,
       contents: contextText(input),
-      config: {
-        systemInstruction: ANSWER_INSTRUCTION,
-        maxOutputTokens: this.options.maxOutputTokens,
-        temperature: 0.2,
-        abortSignal: signal,
-      },
+      config: { ...answerConfig(this.options.maxOutputTokens), abortSignal: signal },
     });
     for await (const chunk of stream) {
       const text = chunk.text;
@@ -146,22 +192,7 @@ export class VertexChat implements ChatLlm, QueryEmbedder {
     const res = await this.models().generateContent({
       model: this.options.models.judge,
       contents: JSON.stringify(items),
-      config: {
-        systemInstruction: JUDGE_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseJsonSchema: {
-          type: "object",
-          properties: {
-            verdicts: {
-              type: "array",
-              items: { type: "string", enum: ["supported", "unsupported"] },
-            },
-          },
-          required: ["verdicts"],
-        },
-        temperature: 0,
-        maxOutputTokens: 256 + inputs.length * 16,
-      },
+      config: judgeConfig(inputs.length),
     });
     const parsed = parseJson(res.text);
     const verdicts: unknown =
