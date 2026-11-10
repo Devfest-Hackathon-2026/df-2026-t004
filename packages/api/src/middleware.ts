@@ -17,19 +17,47 @@ function bearerToken(header: string | undefined): string | undefined {
   return token.length > 0 ? token : undefined;
 }
 
+// Firebase Hosting のリライトの中継サーバーの範囲（Google の 66.249.64.0/19）。
+// 実環境で 66.249.82.x を確認した（#129、未確認事項 U-8）
+const HOSTING_PROXY_CIDR = { base: ipv4ToInt("66.249.64.0"), prefix: 19 } as const;
+
+function ipv4ToInt(ip: string): number | undefined {
+  const parts = ip.split(".");
+  if (parts.length !== 4) return undefined;
+  let n = 0;
+  for (const p of parts) {
+    if (!/^\d{1,3}$/.test(p)) return undefined;
+    const v = Number(p);
+    if (v > 255) return undefined;
+    n = n * 256 + v;
+  }
+  return n;
+}
+
+function isHostingProxy(ip: string): boolean {
+  const n = ipv4ToInt(ip);
+  const { base, prefix } = HOSTING_PROXY_CIDR;
+  if (n === undefined || base === undefined) return false;
+  const block = 2 ** (32 - prefix);
+  return Math.floor(n / block) === Math.floor(base / block);
+}
+
 /**
  * クライアントの IP。Cloud Run の前段が付ける X-Forwarded-For の最後の値を使う
  * （利用者が送った値は前に並ぶため、先頭は信用しない）。
- * Firebase Hosting のリライトを経由するときの位置は未確認事項 U-8。実環境で確かめる。
+ * Firebase Hosting のリライトを経由すると、最後の値は Hosting の中継サーバーになり、
+ * 利用者の IP はその1つ前に入る（U-8、#129 で確認）。そのため最後の値が中継サーバーの
+ * 範囲のときだけ1つ前を使う。範囲外なら最後の値のまま（安全側）。
+ * API は *.run.app で直接も呼べるため、先頭や Fastly-Client-IP は偽装できるので使わない。
  */
 export function clientIp(c: Context): string {
-  const forwarded = c.req.header("X-Forwarded-For");
-  const last = forwarded
-    ?.split(",")
+  const hops = (c.req.header("X-Forwarded-For") ?? "")
+    .split(",")
     .map((s) => s.trim())
-    .filter((s) => s !== "")
-    .at(-1);
-  return last !== undefined && last.length <= 64 ? last : UNKNOWN_IP;
+    .filter((s) => s !== "");
+  let ip = hops.at(-1);
+  if (ip !== undefined && isHostingProxy(ip) && hops.length >= 2) ip = hops.at(-2);
+  return ip !== undefined && ip.length <= 64 ? ip : UNKNOWN_IP;
 }
 
 function tooManyRequests(c: Context, retryAfterSec: number): Response {
