@@ -1,9 +1,9 @@
 {
   "region": "asia-northeast1",
   "ai": {
-    "generationModel": "<設定する>",
-    "judgeModel": "<設定する>",
-    "intentModel": "<設定する>",
+    "generationModel": "gemini-3.5-flash",
+    "judgeModel": "gemini-3.5-flash",
+    "intentModel": "gemini-2.5-flash",
     "location": "asia-northeast1",
     "maxOutputTokens": 1024
   },
