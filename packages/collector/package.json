@@ -19,6 +19,7 @@
     "@hachioji-gov/shared": "*",
     "cheerio": "1.2.0",
     "firebase-admin": "14.5.0",
+    "tsx": "4.20.6",
     "unpdf": "1.9.1"
   }
 }

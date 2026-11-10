@@ -505,14 +505,14 @@
     - 要配慮情報の利用目的と同意、ユーザーデータは東京リージョンに保存すること、認証情報は海外で処理される場合があること、質問文が外部 AI（Vertex AI）に送られること（個人情報のマスク後）と保持の可能性（UW-GC-7 の確認結果を反映）を記載する
     - _Requirements: 9.11, 9.12, 9.15_
 
-- [ ] 28. デプロイの設定を作る
+- [x] 28. デプロイの設定を作る
   - ブランチ: `build/deploy-config` ／ type: `build` ／ PR タイトル例: `build: add deploy configuration for Cloud Run and Hosting`
   - デプロイの実行は UW-GC-14、UW-GC-15（AI はデプロイしない）
   - _Requirements: 9.8, 13.1_
-  - [ ] 28.1 API と収集ジョブのコンテナ設定を作る
+  - [x] 28.1 API と収集ジョブのコンテナ設定を作る
     - `packages/api` と `packages/collector` の Dockerfile（非 root で実行、シークレットをイメージに含めない）、`.dockerignore`
     - _Requirements: 9.10, 13.1_
-  - [ ] 28.2 Hosting の設定とデプロイ用の npm スクリプトを作る
+  - [x] 28.2 Hosting の設定とデプロイ用の npm スクリプトを作る
     - `firebase.json` の Hosting（`packages/web/dist`、SPA、`/api/**` を Cloud Run の東京リージョンへリライト）。手順書のコマンドに対応する npm スクリプト（`min-instances=0`、`max-instances=3`）
     - _Requirements: 9.8, 13.1_
 
