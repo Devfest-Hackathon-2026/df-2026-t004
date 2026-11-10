@@ -1,6 +1,6 @@
 // Firebase Hosting は /api/** をパスを変えずに Cloud Run へ転送する（rewrites）。
 // API のルートは /api を含まないため、受け取ったときに先頭の /api を取り除く。
-// /healthz など、/api の付かないパスはそのまま通す。
+// /health など、/api の付かないパスはそのまま通す。
 
 export const API_PREFIX = "/api";
 
