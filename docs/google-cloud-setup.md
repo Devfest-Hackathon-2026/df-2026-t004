@@ -206,43 +206,55 @@ gcloud firestore databases list
 
 **gcloud でインデックスを1本ずつ作成しないでください。** 設計書では、`scripts/gen-indexes.ts` が `config/app.config.json` から `firebase/firestore.indexes.json` を生成し、それをデプロイする方針です。手で書くと設定とのずれが起きます。
 
-> **未実装の注記:** `scripts/gen-indexes.ts` と `scripts/verify-indexes.ts` は、まだ存在しません（実装前）。実装が終わるまで、この手順 5-2 以降は実行できません。実行方法（例: `npx tsx scripts/gen-indexes.ts`）は実装時に決まるので、実装後の README に合わせてください。
+手順（`gcloud` と `firebase` を使うので、Cloud Shell で実行するのが簡単です。Cloud Shell では、ログインしたアカウントの資格情報と `GOOGLE_CLOUD_PROJECT` が最初から使えます）:
 
-実装後の手順:
+0. リポジトリを取得して、依存を入れます（Cloud Shell の場合）。
 
-1. 設定とインデックス定義を生成します（要確認: 起動コマンドは実装後に確定）。
-
-```powershell
-npx tsx scripts/gen-indexes.ts
+```bash
+git clone https://github.com/yunamaki3/GDGoC2026.git && cd GDGoC2026
+npm ci
+gcloud config set project <PROJECT_ID>
 ```
 
-2. 生成された `firebase/firestore.indexes.json` の内容を確認します。`chunks` 向けのベクトルインデックスが17本あり、`dimension` が設定値（768）であることを見ます。
-3. `firebase.json` の `firestore.indexes` が `firebase/firestore.indexes.json` を指していることを確認します（要確認: パスは実装時に設定）。
-4. デプロイします。
+1. 設定とインデックス定義を生成し、コミット済みのファイルと差分が無いことを確認します（差分が出たら、`config/app.config.json` の変更が PR に反映されていません）。
 
-```powershell
-firebase deploy --only firestore:indexes --project $PROJECT_ID
+```bash
+npm run gen-indexes
+git diff --exit-code firebase/firestore.indexes.json
 ```
 
-5. 状態を確認します。作成には時間がかかり、すべて `READY` になるまでベクトル検索は使えません。
+2. `firebase/firestore.indexes.json` に、`chunks` 向けのベクトルインデックスが17本あり、`dimension` が設定値（768）であることを見ます。同じファイルの `fieldOverrides` に、手順 5-3 の TTL（`usage`・`usageUsers`・`deletionJobs` の `expireAt`）も入っています。
+3. `firebase.json` の `firestore.indexes` が `firebase/firestore.indexes.json` を指していることを確認します。
+4. デプロイします。インデックスと TTL の設定が一緒に反映されます。Cloud Shell でログインを求められたら `npx firebase login --no-localhost` を先に実行します。
 
-```powershell
-gcloud firestore indexes composite list --database="(default)"
-# 状態だけを見やすく表示する場合（要確認: フォーマット式は gcloud のバージョンで変わることがある）
+```bash
+npx firebase deploy --only firestore:indexes --project <PROJECT_ID>
+```
+
+5. 状態を確認します。作成には時間がかかり（数分〜数十分）、すべて `READY` になるまでベクトル検索は使えません。
+
+```bash
 gcloud firestore indexes composite list --database="(default)" --format="table(name,state)"
 ```
 
-   `state` が `CREATING` のものは、しばらく待って再実行します。17本すべてが `READY` になることを確認します。
+   `state` が `CREATING` のものは、しばらく待って再実行します。
 
-6. 設定とインデックスの一致を検証します（要確認: 起動コマンドは実装後に確定）。
+6. 設定とインデックスの一致を検証します。①その版のベクトルインデックスの `dimension` と `embedding.dimensions` の一致、②17本の構成が揃っていて余分が無いこと、③17本がすべて `READY` であること、を検査し、不一致があれば非ゼロで終了します。失敗したときは、`config/app.config.json` を直すか、`gen-indexes` を再実行して再デプロイします。
 
-```powershell
-npx tsx scripts/verify-indexes.ts
+```bash
+gcloud firestore indexes composite list --database="(default)" --format=json > indexes.json
+npm run verify-indexes -- --input indexes.json
 ```
 
-   `verify-indexes` は、内部で `gcloud firestore indexes composite list --format=json` を読み、①`embedding.dimensions` と各ベクトルインデックスの `dimension` の一致、②17本の期待する構成が揃っていること、③状態が `READY` であること、を検査します。不一致があると非ゼロで終了します。失敗したときは、`config/app.config.json` を直すか、`gen-indexes` を再実行して再デプロイします。
+7. 実環境で、等価条件だけの事前フィルタつきベクトル検索が動くことを確かめます（設計書 U-1）。17本のインデックスと同じ条件の組で、API と同じ形の `findNearest` を1回ずつ実行します。読み取りだけで、何も書き込みません。`chunks` が空でも、インデックスが使えれば `OK` になります。
 
-   `gen-indexes` の出力とコミット済みの `firestore.indexes.json` が一致することは、CI の `index-consistency` ジョブでも検査されます。
+```bash
+npm run probe-vector-search
+```
+
+   `NG` の行には Firestore のエラー（インデックスが無い・作成中のときは `FAILED_PRECONDITION`）が出ます。5 で `READY` になってから再実行してください。
+
+   `gen-indexes` の出力とコミット済みの `firestore.indexes.json` が一致することは、CI の `index-consistency` ジョブでも検査されます。Emulator での確認結果（`in` や `array-contains` との併用を含む）は PR #113 に記録しています。
 
 次元を変える場合は、設計書の「埋め込みの版管理と再生成」の手順（収集を停止 → 新しい版のインデックスを作成 → `reembed` → 検証 → 切り替え）に従ってください。`dimension` と `embedding.dimensions` を必ず同じ値にします。
 
@@ -255,6 +267,8 @@ npx tsx scripts/verify-indexes.ts
 | `usage` | 全体の日次AI呼び出し回数 |
 | `usageUsers` | ユーザー別の日次AI呼び出し回数 |
 | `deletionJobs` | アカウント削除の進行状態 |
+
+TTL の設定は `firebase/firestore.indexes.json` の `fieldOverrides` に含まれているので、手順 5-2 の `firebase deploy --only firestore:indexes` で一緒に反映されます。下の `gcloud` のコマンドは、デプロイを使わずに個別に有効にする場合の方法です。どちらの場合も、最後の「確認」は行ってください。
 
 ```powershell
 gcloud firestore fields ttls update expireAt --collection-group=usage --enable-ttl
